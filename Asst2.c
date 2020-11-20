@@ -21,7 +21,7 @@ struct file_listNode{
 struct thread_arg{
 struct file_listNode file_head;
 pthread_mutex_t mut;
-DIR open_dir;
+char* path;
 };
 
 
@@ -33,13 +33,32 @@ new directory or file is found, we assume that
 each directory contains only subdirectories and
 text files, no other kind of files will be given to us
 */
-void *directory_handler(void *arg){
+void *directory_handler(void *argument){
 
-//this dirent gets over written each time readdir is called
-  struct dirent *current; 
+  struct thread_arg* arg = (struct thread_arg*)argument;
+  DIR *dirp = opendir(arg->path);
+  if(dirp == NULL)
+    {
+        perror("Not a directory");
+        return(1);
+    }
+  struct dirent *current; //this dirent gets over written each time readdir is called
   int files = 0;
-  struct thread_arg* argument = (struct thread_arg*)arg;
-  while(current=readdir((argument->open_dir)){
+  char* sub_dir; 
+  
+    if(dirp == NULL)
+    {
+        perror("Not a directory");
+        return(1);
+    }
+
+    pthread_attr_t threadAttr, file_attr;		
+    pthread_attr_init(&threadAttr);
+    pthread_attr_init(&file_attr);
+    pthread_t thread, file_thread;
+	
+	
+  while(current=readdir((dirp)){
     files++;
 
     //skip over . and .. directories else we will have an infinite
@@ -49,25 +68,46 @@ void *directory_handler(void *arg){
     }
 
     //DT_DIR = 4 means current is a directory
-    if(current->d_type==4){
+    if(current->d_type==DT_DIR){
       //recursion here along with creation of thread
-    }
-    //DT_REG = 8 means current is a file
-    else if(current->d_type==8){
-      //create struct for new file_listNode, then lock mutex, add struct to shared list, then unlock
-      //minimum functionality inside the mutex lock so that if malloc fails
-      //we don't encounter the fail within a lock
-      struct file_listNode* new_node = malloc(sizeof(struct file_listNode)) ;
-      new_node->filename = current->d_name;
-      new_node->num_token = 0;
-      new_node->tokenList = NULL;
-      struct file_listNode* temp;
+      //if we hit a subdirectory, we set sub_dir with d_name as this
+      //is the next directory we pass as argument to new thread using struct thread_arg
+      sub_dir = current->d_name; //you may want to concatenate this with argument->dir/
+      char * old_path = (char *)malloc(sizeof(char)*strlen(arg->path)); 
+      int k;
 
-      //lock, adding to head of the list
-      temp = argument->fileHead;
-      argument->fileHead = new_node;
-      new_node->nextFile = temp;
-      //unlock
+      for(k=0; k<strlen(arg->path); k++){
+	*(old_path+k) = *(arg->path+k);
+      }
+
+      arg->path = strcat(arg->path,"/");
+      arg->path = strcat(arg->path,current->d_name);
+
+      pthread_create(&thread, &threadAttr, directory_handler, (void *)(arg));
+      printf("current path %s\n",old_path);
+      pthread_join(thread, NULL);
+      arg->path = old_path; // roll back file path after thread has finished exploring previous dir
+      pthread_attr_destroy(&threadAttr);
+      
+    }
+    
+    //DT_REG = 8 means current is a file
+    else if(current->d_type==DT_REG){
+      
+      char * old_path = (char *)malloc(sizeof(char)*strlen(arg->path));
+      int k;
+
+      for(k=0; k<strlen(arg->path); k++){
+        *(old_path+k) = *(arg->path+k);
+      }
+
+      arg->path = strcat(arg->path,"/");
+      arg->path = strcat(arg->path,current->d_name);
+      pthread_create(&file_thread, &file_attr, file_handler, (void *)(arg));
+      printf("current path %s\n",old_path);
+      pthread_join(file_thread, NULL);
+      arg->path = old_path; // roll back file path after thread has finished exploring previous dir                                                                                      
+      pthread_attr_destroy(&file_attr);
     }
     
     //skip over anything that is not a file or directory 
@@ -77,10 +117,44 @@ void *directory_handler(void *arg){
     
     printf("File %d's name: %s, Type: %d\n", files, current->d_name, current->d_type);
   }
+
+    //closing the open directory                                                                                                                                                         
+    closedir(dirp);
   pthread_exit(NULL);
 }
 
 
+void *file_handler(void* argument){
+
+  struct thread_arg* arg = (struct thread_arg*)argument;
+
+   struct file_listNode* temp;
+      struct file_listNode* new_node = malloc(sizeof(struct file_listNode)) ;
+      new_node->num_token = 0;
+      new_node->tokenList = NULL;
+
+      pthread_mutex_lock(&(arg->mut));
+      new_node->filename = arg->path;
+      temp = arg->file_head;
+      arg->file_head = new_node;
+      new_node->nextFile = temp;
+      pthread_mutex_unlock(&(arg->mut));
+
+      int fd = open(new_node->filename, O_RDONLY);
+
+      if(fd<=0){
+	puts("Not a file");
+	exit(EXIT_FAILURE);
+      }
+
+      off_t off = lseek(fd,0,SEEK_END);
+      printf("size of this file %llu", (long long int)off);
+      
+      close(fd);
+      pthread_exit(NULL);
+  
+}
+  
 int main(int argc, char **argv)
 {
   //check for valid number of arguments 
@@ -88,38 +162,15 @@ int main(int argc, char **argv)
     puts("Invalid number of arguments");
     exit(0);
   }
+  char* dir_handle  = argv[1]; 
+  struct thread_arg *args = (struct thread_arg*) malloc (sizeof(struct thread_arg));
+  args->dir = dir_handle;
+  args->file_head = NULL;
+  args->mut = PTHREAD_MUTEX_INITIALIZER;
 
-  //opening the given directory read from argv[1]
-    DIR *dirp;
-    dirp = opendir(argv[1]);
-    
-    if(dirp == NULL)
-    {
-        perror("Not a directory");
-        return(1);
-    }
-
-    //initializing pthread attributes
-    pthread_attr_t attr;
-    int err1 = pthread_attr_init(&attr);
-    if(err1) {
-      exit(EXIT_FAILURE);
-    }
-
-    //declared thread id
-    pthread_t thread_id;
-    int err = pthread_create(&thread_id, &attr, directory_handler, (void*)(dirp));
-    if(err){
-      exit(EXIT_FAILURE);
-    }
-
-    //joining the thread created with thread_id
-    pthread_join(thread_id, NULL);
-
-    //closing the open directory
-    closedir(dirp);
-
-    //colored printing on terminal
+  directory_handler((void*)args);
+  
+  //colored printing on terminal
     printf("\033[0;31m");
     printf("This better be red\n");
     printf("\033[0m");
