@@ -104,8 +104,8 @@ void * dir_handler(void * dir_info){
 				int arg_p = strlen(arg->path); 
 				int argFile_d = strlen(file->d_name);
 
-				char * concat_path = (char *)malloc(sizeof(char) * (arg_p + argFile_d +1) ); // malloc space for new concat path
-				*(concat_path+arg_p+argFile_d) = '\0';
+				char * concat_path = (char *)malloc(sizeof(char) * (arg_p + argFile_d +2) ); // malloc space for new concat path
+				*(concat_path+arg_p+argFile_d+2) = '\0';
 				
 				int k=0;  
 
@@ -119,7 +119,9 @@ void * dir_handler(void * dir_info){
 				for(k;k<=argFile_d;k++){ 
 					*(concat_path+k+arg_p+1) = *(file->d_name +k);
 				}   
-				
+				 
+
+				//char * concat_path = strcat()
 				printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
@@ -140,8 +142,8 @@ void * dir_handler(void * dir_info){
 				int arg_p2 = strlen(arg->path); 
 				int argFile_d2 = strlen(file->d_name);
 
-				char * concat_path2 = (char *)malloc(sizeof(char) * (arg_p2 + argFile_d2 +1) ); // malloc space for new concat path
-				*(concat_path2 + arg_p2 + argFile_d2) = '\0';
+				char * concat_path2 = (char *)malloc(sizeof(char) * (arg_p2 + argFile_d2 +2) ); // malloc space for new concat path
+				*(concat_path2 + arg_p2 + argFile_d2+2) = '\0';
 				
 				int k=0;  
 
