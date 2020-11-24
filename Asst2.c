@@ -68,7 +68,7 @@ void *directory_handler(void *argument){
 
     //skip over . and .. directories else we will have an infinite
     //number of directories during recursion
-    if(strcmp(current->d_name, ".") || strcmp(current->d_name, "..")){
+    if(strcmp(current->d_name, ".")==0 || strcmp(current->d_name, "..")==0){
       continue;
     }
 
@@ -77,7 +77,7 @@ void *directory_handler(void *argument){
       //recursion here along with creation of thread
       //if we hit a subdirectory, we set sub_dir with d_name as this
       //is the next directory we pass as argument to new thread using struct thread_arg
-      sub_dir = current->d_name; //you may want to concatenate this with argument->dir/
+      // sub_dir = current->d_name; //you may want to concatenate this with argument->dir/
       pthread_mutex_lock(&(arg->mut));
       char * old_path = (char *)malloc(sizeof(char)*strlen(arg->path)); 
       int k;
@@ -88,17 +88,18 @@ void *directory_handler(void *argument){
 
       arg->path = strcat(arg->path,"/");
       arg->path = strcat(arg->path,current->d_name);
-      pthread_mutex_unlock(&(arg->mut));
       pthread_create(&thread, &threadAttr, directory_handler, (void *)(arg));
+       pthread_mutex_unlock(&(arg->mut));
+      //      pthread_create(&thread, &threadAttr, directory_handler, (void *)(arg));
       printf("current path %s\n",old_path);
       pthread_join(thread, NULL);
-      pthread_mutex_lock(&(arg->mut));
+       pthread_mutex_lock(&(arg->mut));
       arg->path = old_path; // roll back file path after thread has finished exploring previous dir
       pthread_mutex_unlock(&(arg->mut));
       pthread_attr_destroy(&threadAttr);
       
     }
-    
+    /*
     //DT_REG = 8 means current is a file
     else if(current->d_type==DT_REG){
       pthread_mutex_lock(&(arg->mut));
@@ -120,7 +121,7 @@ void *directory_handler(void *argument){
       pthread_mutex_unlock(&(arg->mut));
       pthread_attr_destroy(&file_attr);
     }
-    
+    */
     //skip over anything that is not a file or directory 
     else{
       continue;
