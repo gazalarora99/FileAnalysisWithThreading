@@ -62,12 +62,13 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 
 
 //pthread_mutex_lock(arg->lock);
-printf("a\n");
+printf("%s\n",arg->path);
+//printf("a\n");
 // token function call
 // call math functions  
 
 //pthread_mutex_unlock(arg->lock);
-
+free(arg);
 pthread_exit(0);
 }
 
@@ -79,9 +80,9 @@ void * dir_handler(void * dir_info){
 
 	struct thread_arg * arg = (struct thread_arg *)dir_info ;
 
-	printf("the dir name %s \n",arg->path);
+	//printf("the dir name %s \n",arg->path);
+	
 	DIR * ptr = opendir(arg->path); 
-	//printf("isnull %d",ptr == NULL);
 	struct dirent * file  = readdir(ptr); 
 	
 	int safety  = 0; 
@@ -99,88 +100,75 @@ void * dir_handler(void * dir_info){
 		
 		if(file->d_name[0]!='.'){
 			if(file->d_type == DT_DIR){ // checks if current object is a directory
-				char * hold  = arg->path;
-				/*
+				
 				int arg_p = strlen(arg->path); 
 				int argFile_d = strlen(file->d_name);
 
-				char * old_path = (char *)malloc(sizeof(char) * (arg_p + argFile_d) ); // malloc space for new concat path
-				*(old_path+arg_p+argFile_d) = '\0';
+				char * concat_path = (char *)malloc(sizeof(char) * (arg_p + argFile_d +1) ); // malloc space for new concat path
+				*(concat_path+arg_p+argFile_d) = '\0';
 				
 				int k=0;  
 
 				for(k;k<arg_p;k++){ 
-					*(old_path+k) = *(arg->path +k);
+					*(concat_path+k) = *(arg->path +k);
 				}  
 				
-				*(old_path + arg_p ) = '/'; 
+				*(concat_path + arg_p ) = '/'; 
 				k=0;
+				
 				for(k;k<=argFile_d;k++){ 
-					*(old_path+k+arg_p+1) = *(file->d_name +k);
-				}  
-*/
-				// above two for loops concatenate new address on
-				 /* 
+					*(concat_path+k+arg_p+1) = *(file->d_name +k);
+				}   
+				
+				printf("dir path %s \n",concat_path);
+				/*
+				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
 					dynamically allocating
 				 */
-					arg->path = file->d_name;
 				 
-				pthread_create(&thread, &threadAttr, dir_handler, (void *)(arg) );	
+				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
+				sub_dir_arg->path = concat_path;
+				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
 //				printf("hold path %s\n",hold);
-
-			//	pthread_join(thread, NULL); 
 				
-			//	free(old_path); // once we have used this new path we free the malloc memory
-				
-				arg->path = hold;// we then resume use of the old path
-				
-				//pthread_attr_destroy(&threadAttr);
 			} 
 		else if(file->d_type == DT_REG){ // checks if current object is a file
-			/*	
-				char * hold2  = arg->path;
+				
+				
 				int arg_p2 = strlen(arg->path); 
 				int argFile_d2 = strlen(file->d_name);
 
-				char * old_path2 = (char *)malloc(sizeof(char) * (arg_p2 + argFile_d2) ); // stores original path before updating
-				*(old_path2+arg_p2+argFile_d2) = '\0';
+				char * concat_path2 = (char *)malloc(sizeof(char) * (arg_p2 + argFile_d2 +1) ); // malloc space for new concat path
+				*(concat_path2 + arg_p2 + argFile_d2) = '\0';
+				
 				int k=0;  
 
-				for(k; k <arg_p2;k++){ 
-					*(old_path2 + k) = *(arg->path +k);
+				for(k;k<arg_p2;k++){ 
+					*(concat_path2+k) = *(arg->path +k);
 				}  
 				
-				*(old_path2 + arg_p2 ) = '/'; 
-				
+				*(concat_path2 + arg_p2 ) = '/'; 
 				k=0;
+				
 				for(k;k<=argFile_d2;k++){ 
-					*(old_path2 +k+arg_p2+1) = *(file->d_name +k);
-				}  
-				printf("current file path %s\n",old_path2);
-			
-				// above two for loops concatenate new address on
-				  
-				//	decided to do concat myself so that I can keep track of the addresses that I am
-				//	dynamically allocating
+					*(concat_path2+k+arg_p2+1) = *(file->d_name +k);
+				}   
+				
+//				printf("file path %s \n",concat_path2);
+			/*	
+				 	above two for loops concatenate new address on  
+					decided to do concat myself so that I can keep track of the addresses that I am
+					dynamically allocating
+				*/ 
 				 
-					arg->path = old_path2;
-				 
-//				pthread_create(&thread2, &threadAttr, file_handler, (void *)(arg) );	
+				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
+				sub_dir_arg->path = concat_path2;
 				
-//				printf("hold path %s\n",hold);
-
-	//			pthread_join(thread2, NULL); 
-				
-				free(old_path2); 
-				
-				arg->path = hold2;
+				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
 					
-				*/	
-					
-					
-					printf("%s\n",file->d_name);
+				//printf("%s\n",file->d_name);
 			
 		 } 
 	}
@@ -199,10 +187,11 @@ void * dir_handler(void * dir_info){
 	}
 
 	closedir(ptr);
-	pthread_attr_destroy(&threadAttr);
 	pthread_join(thread,NULL);
+	pthread_join(thread2,NULL);
+	pthread_attr_destroy(&threadAttr);
+	free(arg);
 	pthread_exit(0);
-	
 }
 
 
