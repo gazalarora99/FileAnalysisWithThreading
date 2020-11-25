@@ -67,10 +67,6 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 
 
 pthread_mutex_lock(arg->lock);
-//printf("%s\n",arg->path);
-//printf("a\n");
-// token function call
-// call math functions  
   int fd;
   //  while(pthread_mutex_trylock(arg->lock)!=0){
     //waiting
@@ -156,7 +152,6 @@ void * dir_handler(void * dir_info){
 				}   
 				 
 
-				//char * concat_path = strcat()
 			//	printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
@@ -194,7 +189,6 @@ void * dir_handler(void * dir_info){
 					*(concat_path2+k+arg_p2+1) = *(file->d_name +k);
 				}   
 				
-//				printf("file path %s \n",concat_path2);
 			/*	
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
