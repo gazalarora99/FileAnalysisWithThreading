@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <fcntl.h>
+#include <ctype.h>
 void directory_handler(void* arg);
 void directory_handler(void* arg){
 struct dirent *dir;
@@ -53,5 +54,29 @@ struct dirent *dir;
 }
 
 int main(int argc, char** argv){
-  directory_handler((void*)argv[1]);  
+  //directory_handler((void*)argv[1]);
+  int fd;
+  fd = open("./test_dir/dumbfile.txt", O_RDONLY);
+  if (fd>=0) {
+    printf("file opened\n");
+  }
+  off_t off = lseek(fd, 0, SEEK_END);
+  printf("size of file %llu\n", (long long int) off);
+  char *buf = malloc(sizeof(char) * ((int)off));
+  int size = (int) off;
+  off= lseek(fd,0,SEEK_SET);
+  printf("new offset %llu\n", (long long int) off);
+  int bytes, pos;
+  //  bytes=read(fd,buf,(int) size);
+  //printf("read %d bytes\n", bytes);
+  while((bytes=read(fd,buf,size)) > 0){
+    printf("read %d bytes\n", bytes);
+    for(pos=0; pos<bytes; pos++){
+      if(isalpha(buf[pos])){
+	printf("%c\n", buf[pos]);
+      }
+    }
+    printf("%s\n", buf);
+  }
+  return 0;
 }

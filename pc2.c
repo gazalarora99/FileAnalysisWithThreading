@@ -4,6 +4,9 @@
 #include<string.h>
 #include<sys/types.h>
 #include<dirent.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <ctype.h>
 
 void * dir_handler(void * dir_info); 
 void * file_handler(void * file_info);
@@ -62,11 +65,41 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 
 
 //pthread_mutex_lock(arg->lock);
-printf("%s\n",arg->path);
+//printf("%s\n",arg->path);
 //printf("a\n");
 // token function call
 // call math functions  
+  int fd;
+  //  while(pthread_mutex_trylock(arg->lock)!=0){
+    //waiting
+  // puts("waiting");
+  // }
+  fd = open(arg->path, O_RDONLY);
+  if (fd>=0) {
+    printf("file %s opened\n", arg->path);
+  }
+  //  pthread_mutex_unlock(arg->lock); 
+  off_t off = lseek(fd, 0, SEEK_END);
+  printf("size of file %llu\n", (long long int) off);
+  char *buf = malloc(sizeof(char) * ((int)off));
+  int size = (int) off;
+  off= lseek(fd,0,SEEK_SET);
+  printf("new offset %llu\n", (long long int) off);
+  int bytes, pos;
+  //  bytes=read(fd,buf,(int) size);                                                                                                                   
+  //printf("read %d bytes\n", bytes);                                                                                                                  
+  while((bytes=read(fd,buf,size)) > 0){
+    printf("read %d bytes\n", bytes);
+    //for(pos=0; pos<bytes; pos++){
+      //if(isalpha(buf[pos])){
+      //printf("%c\n", buf[pos]);
+      //}
+      //}
+    printf("%s\n", buf);
+  }
 
+
+ 
 //pthread_mutex_unlock(arg->lock);
 free(arg);
 pthread_exit(0);
