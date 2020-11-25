@@ -7,7 +7,7 @@
 
 void * dir_handler(void * dir_info); 
 void * file_handler(void * file_info);
-
+struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob); 
 
 struct thread_arg{ // this argument stuct is passed to pthread_create so our routine has access to the right arguments 
 	pthread_mutex_t * lock;
@@ -20,13 +20,13 @@ struct thread_arg{ // this argument stuct is passed to pthread_create so our rou
 struct Tnode{  // token node for linked list of tokens
 char * token;
 double prob; 
-struct node * next_token;
+struct Tnode * next_token;
 };
 
 
 struct Lnode{ // list nodes for list of linked list
 char * file_handle;
-struct Tnode * token_list;
+struct Tnode ** token_list;
 struct Lnode * next_list;
 };
 
@@ -41,15 +41,89 @@ int main(int argc, char * argv[]){
 
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
-
+	pthread_mutex_t file_lock; // for file sync to work we need to make sure the lock is initialized outside of function 
+	pthread_mutex_init(&file_lock,NULL);
+	
 	dir_obj->path = dir_handle; 
-	dir_obj->lock = NULL;
+	dir_obj->lock = &file_lock;
 	
 	
 	dir_handler((void *)dir_obj);
-
+	
+	pthread_mutex_destroy(&file_lock); 	
+	
 	return 1;
 }
+
+
+
+struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob){ 
+/* insert nodes in alphabetical order 
+need to free this all later since this memory is dynamically allocated
+We want to make sure that the inserted tokens are unique and not duplicates
+*/	
+		if(shared_struct == NULL){ 
+						struct Tnode * head  =  (struct Tnode *)malloc(sizeof(struct Tnode)); 
+						head->token = token;
+						head->prob = prob;
+						head->next_token = NULL;
+						return head;
+				} 
+				else{ 
+						struct Tnode * ptr = shared_struct;
+						int flag = 0;
+						
+						if( *(ptr->token) > *token){ 
+							struct Tnode * new_head = (struct Tnode *)malloc(sizeof(struct Tnode)); 
+							new_head->token = token; 
+							new_head->prob = prob;
+							new_head->next_token = ptr; 
+							return ptr;
+						} 
+
+						while(ptr->next_token != NULL){ 
+								
+								if(*(ptr->next_token->token) > *token){ 
+											flag = 1;
+											break;
+											
+									}
+								
+								ptr = ptr->next_token;
+						}
+
+						
+						if(flag){
+							struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));
+							new_node->token = token;
+							new_node->prob = prob;
+							
+							struct Tnode * hold; 
+
+							hold = ptr->next_token;
+							ptr->next_token = new_node;
+							new_node->next_token = hold;
+							return shared_struct;
+						} 
+						else{ 
+								struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));			
+								new_node->token = token; 
+								new_node->prob = prob; 
+								ptr->next_token = new_node; 
+								return shared_struct;
+						}
+
+
+				}
+				
+
+
+
+
+
+
+}
+
 
 
 
@@ -60,16 +134,20 @@ void * file_handler(void * file_info){
 
 struct thread_arg *arg  = (struct thread_arg *)file_info;
 
+		
+	pthread_mutex_lock(arg->lock);
+		
+	int i =0; 
+	for(i;i<5;i++){ 
+		printf("%d\n",i);
+	} 
+	printf("%s\n",arg->path);
 
-//pthread_mutex_lock(arg->lock);
-printf("%s\n",arg->path);
-//printf("a\n");
-// token function call
-// call math functions  
+	pthread_mutex_unlock(arg->lock);
+	
+	free(arg);
+	pthread_exit(0);
 
-//pthread_mutex_unlock(arg->lock);
-free(arg);
-pthread_exit(0);
 }
 
 
@@ -94,8 +172,7 @@ void * dir_handler(void * dir_info){
 
 	pthread_t thread2; // handles calls to file handler
 	
-	pthread_mutex_t file_lock;
-	pthread_mutex_init(&file_lock,NULL);
+	
 	while(file != NULL){
 		
 		if(file->d_name[0]!='.'){
@@ -122,7 +199,7 @@ void * dir_handler(void * dir_info){
 				 
 
 				//char * concat_path = strcat()
-				printf("dir path %s \n",concat_path);
+	//			printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
@@ -131,6 +208,7 @@ void * dir_handler(void * dir_info){
 				 
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path;
+				sub_dir_arg->lock = arg->lock;
 				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
 //				printf("hold path %s\n",hold);
@@ -164,9 +242,10 @@ void * dir_handler(void * dir_info){
 					decided to do concat myself so that I can keep track of the addresses that I am
 					dynamically allocating
 				*/ 
-				 
+				
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path2;
+				sub_dir_arg->lock = arg->lock;
 				
 				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
 					
