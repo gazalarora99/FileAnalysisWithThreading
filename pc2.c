@@ -44,9 +44,11 @@ int main(int argc, char * argv[]){
 
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
-
+	pthread_mutex_t file_lock;
+	pthread_mutex_init(&file_lock,NULL);
+	
 	dir_obj->path = dir_handle; 
-	dir_obj->lock = NULL;
+	dir_obj->lock = &file_lock;
 	
 	
 	dir_handler((void *)dir_obj);
@@ -64,7 +66,7 @@ void * file_handler(void * file_info){
 struct thread_arg *arg  = (struct thread_arg *)file_info;
 
 
-//pthread_mutex_lock(arg->lock);
+pthread_mutex_lock(arg->lock);
 //printf("%s\n",arg->path);
 //printf("a\n");
 // token function call
@@ -100,7 +102,7 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 
 
  
-//pthread_mutex_unlock(arg->lock);
+pthread_mutex_unlock(arg->lock);
 free(arg);
 pthread_exit(0);
 }
@@ -127,8 +129,8 @@ void * dir_handler(void * dir_info){
 
 	pthread_t thread2; // handles calls to file handler
 	
-	pthread_mutex_t file_lock;
-	pthread_mutex_init(&file_lock,NULL);
+//	pthread_mutex_t file_lock;
+//	pthread_mutex_init(&file_lock,NULL);
 	while(file != NULL){
 		
 		if(file->d_name[0]!='.'){
@@ -155,7 +157,7 @@ void * dir_handler(void * dir_info){
 				 
 
 				//char * concat_path = strcat()
-				printf("dir path %s \n",concat_path);
+			//	printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
@@ -163,7 +165,8 @@ void * dir_handler(void * dir_info){
 				 */
 				 
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
-				sub_dir_arg->path = concat_path;
+				sub_dir_arg->path = concat_path; 
+				sub_dir_arg->lock = arg->lock;
 				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
 //				printf("hold path %s\n",hold);
@@ -200,7 +203,7 @@ void * dir_handler(void * dir_info){
 				 
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path2;
-				
+				sub_dir_arg->lock = arg->lock;	
 				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
 					
 				//printf("%s\n",file->d_name);
