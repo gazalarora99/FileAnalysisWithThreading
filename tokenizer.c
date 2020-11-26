@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
+#include <pc2.c>
 
 enum token_type {Integer, Word, Hexadecimal, Octal, FloatingPoint, COperator, CKeyword, SingleQuote, DoubleQuote};
 
@@ -805,18 +805,18 @@ int Invalid_Token(char c, int substring_index, char* input){
   return 0;
 }
 
-int main(int argc, char** argv){
-
-if (argc!=2){
+//int main(int argc, char** argv){
+void tokenize(char* string){
+  /*if (argc!=2){
   puts("Invalid number of arguments");
   return 1;
-}
+  }*/
 
 //////TO TEST DIFFERENT INPUT STRING, COMMENT OUT THE FOLLOWING 3 LINES
 //Copies string from argv[1] into inputstring
-int size_input_string = strlen(argv[1]);
+int size_input_string = strlen(string);
 char *inputString = malloc(sizeof(char)*(size_input_string)+1);
-strncpy(inputString, argv[1], size_input_string+1);
+strncpy(inputString, string, size_input_string+1);
 /////
 
 ////////TO TEST DIFFERENT INPUTSTRINGS, UNCOMMENT THIS SINGLE LINE WITH YOUR INPUT
@@ -825,7 +825,7 @@ strncpy(inputString, argv[1], size_input_string+1);
 
  if(strlen(inputString)==0){
    puts("Empty string input, no tokens");
-   return 0;
+   return;
  }
 
 //i iterates through input string char by char
@@ -851,7 +851,7 @@ while(inputString[i]!='\0'){
     beginSubstringIndex = skipComments(inputString, i, i+1, inputString[i], inputString[i+1]);
     i = beginSubstringIndex;
     if(i==-1) {
-    return 0;
+    return ;
     }
     else{
       continue;
@@ -1008,5 +1008,5 @@ i++;
 //free(inputString);
 free(currentstring);
 freeLinkedList(head);	
-return 0;
+
 }
