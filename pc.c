@@ -53,7 +53,7 @@ int main(int argc, char * argv[]){
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
-/*	
+	
 	pthread_attr_t	threadAttr2;		
 	pthread_attr_init(&threadAttr2);
 
@@ -66,21 +66,20 @@ int main(int argc, char * argv[]){
 	 
 	
 
-	pthread_join(parent,NULL);
-*/	
+	pthread_join(parent,NULL); 
+
 	struct thread_node * ptr = id_list;
-	dir_handler((void *)dir_obj);
+//	dir_handler((void *)dir_obj);
 	
 	while(ptr!=NULL){ 
 		pthread_join( *(ptr->id),NULL);
 		ptr = ptr->nextId;
 	} 
-	//pthread_exit(0);
 //	dir_handler((void *)dir_obj);
 	
 	pthread_mutex_destroy(&file_lock); 	
-//	pthread_attr_destroy(&threadAttr2); 
-
+	pthread_attr_destroy(&threadAttr2); 
+	printf("wowza\n");
 	return 1;
 }
 
@@ -352,8 +351,8 @@ void * dir_handler(void * dir_info){
 	// pthread_attr_destroy(&threadAttr);
 	free(arg);
 	print_Id_list(id_list);
-	return NULL ;
-//	pthread_exit(0);
+//	return NULL ;
+	pthread_exit(0);
 }
 
 
