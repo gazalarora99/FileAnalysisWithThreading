@@ -8,14 +8,22 @@
 void * dir_handler(void * dir_info); 
 void * file_handler(void * file_info);
 struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob); 
+  
 
 struct thread_arg{ // this argument stuct is passed to pthread_create so our routine has access to the right arguments 
 	pthread_mutex_t * lock;
 	char * path;	
 }; 
 
+struct thread_node{ 
+	pthread_t * id; // thread id 
+	struct thread_node * nextId;
+};
 
+struct thread_node * id_list = NULL;  
 
+struct thread_node * idIns(pthread_t * id, struct thread_node * list);
+void print_Id_list(struct thread_node * list);
 
 struct Tnode{  // token node for linked list of tokens
 char * token;
@@ -32,12 +40,11 @@ struct Lnode * next_list;
 
 
 
-
-
 int main(int argc, char * argv[]){ 
 
 
 	char * dir_handle  = argv[1]; 
+
 
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
@@ -46,12 +53,34 @@ int main(int argc, char * argv[]){
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
+/*	
+	pthread_attr_t	threadAttr2;		
+	pthread_attr_init(&threadAttr2);
+
+	pthread_t parent;
 	
+	pthread_create(&parent,&threadAttr2,dir_handler, (void *)dir_obj);
+ 
+ 	printf("parent Id %ld\n",parent); 
+
+	 
 	
+
+	pthread_join(parent,NULL);
+*/	
+	struct thread_node * ptr = id_list;
 	dir_handler((void *)dir_obj);
 	
-	pthread_mutex_destroy(&file_lock); 	
+	while(ptr!=NULL){ 
+		pthread_join( *(ptr->id),NULL);
+		ptr = ptr->nextId;
+	} 
+	//pthread_exit(0);
+//	dir_handler((void *)dir_obj);
 	
+	pthread_mutex_destroy(&file_lock); 	
+//	pthread_attr_destroy(&threadAttr2); 
+
 	return 1;
 }
 
@@ -142,16 +171,58 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 		printf("%d\n",i);
 	} 
 	printf("%s\n",arg->path);
-
+	
 	pthread_mutex_unlock(arg->lock);
 	
+
+
 	free(arg);
 	pthread_exit(0);
 
 }
 
 
+struct thread_node * idIns(pthread_t * id, struct thread_node * list){ 
+	/*  
+		We are going to make a global list of all created threads in dir handler
+	*/
+	if(list == NULL){ 
+			list = (struct thread_node *)malloc(sizeof(struct thread_node ));  
+			list->id = id; 
+			list->nextId = NULL; 
+			return list;
+	}
+	
 
+ printf("we went here\n");
+ 
+ struct thread_node * ptr = list;
+ 	while(ptr->nextId!=NULL){ 
+		ptr = ptr->nextId;
+	} 
+
+	struct thread_node * newId = (struct thread_node *)malloc(sizeof(struct thread_node ));  
+	newId->id = id; 
+	newId->nextId = NULL;
+	
+	ptr->nextId = newId;
+	
+	return list;
+
+}
+
+void print_Id_list(struct thread_node * list){ 
+
+
+struct thread_node * ptr = list;
+	int i =0;
+	while(ptr!=NULL){ 
+		i++;
+		printf("thread Id %ld \n",*(ptr->id));
+		ptr = ptr->nextId;
+	}
+ 	printf("thread count %d\n",i);
+} 
 
 
 void * dir_handler(void * dir_info){ 
@@ -199,7 +270,7 @@ void * dir_handler(void * dir_info){
 				 
 
 				//char * concat_path = strcat()
-	//			printf("dir path %s \n",concat_path);
+				printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
@@ -209,8 +280,13 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path;
 				sub_dir_arg->lock = arg->lock;
-				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
+				pthread_t  *ptr = (pthread_t * )malloc(sizeof(pthread_t));
+				pthread_create(ptr, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
+				
+				id_list = idIns(ptr,id_list); 
+
+				printf("thread  name %ld \n",*ptr);
 //				printf("hold path %s\n",hold);
 				
 			} 
@@ -246,9 +322,12 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path2;
 				sub_dir_arg->lock = arg->lock;
+				pthread_t * ptr = (pthread_t * )malloc(sizeof(pthread_t));
 				
-				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
-					
+				pthread_create(ptr, &threadAttr, file_handler, (void *)(sub_dir_arg) );
+				id_list = idIns(ptr,id_list); 
+				
+				printf("thread 2 name %ld \n",*ptr); 
 				//printf("%s\n",file->d_name);
 			
 		 } 
@@ -268,11 +347,13 @@ void * dir_handler(void * dir_info){
 	}
 
 	closedir(ptr);
-	pthread_join(thread,NULL);
-	pthread_join(thread2,NULL);
-	pthread_attr_destroy(&threadAttr);
+//	pthread_join(thread,NULL);
+//	pthread_join(thread2,NULL);
+	// pthread_attr_destroy(&threadAttr);
 	free(arg);
-	pthread_exit(0);
+	print_Id_list(id_list);
+	return NULL ;
+//	pthread_exit(0);
 }
 
 

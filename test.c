@@ -5,7 +5,6 @@
 #include<stdio.h>
 #include<unistd.h>
 #include<unistd.h>
-
 int main(int argc, char * argv[]){ 
 
  char arr[240];

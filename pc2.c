@@ -27,7 +27,7 @@ struct thread_arg{ // this argument stuct is passed to pthread_create so our rou
 	pthread_mutex_t * lock;
 	char * path;
   struct Lnode *head;
-}*dir_obj; 
+}; 
 
 void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
@@ -41,17 +41,19 @@ int main(int argc, char * argv[]){
 
 
 	char * dir_handle  = argv[1]; 
-        dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
+  
+	
+	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
+	
 	pthread_mutex_t file_lock;
 	pthread_mutex_init(&file_lock,NULL);
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
-	dir_obj->head = NULL;
-	//(struct Lnode*)malloc(sizeof(struct Lnode));
-        //struct Lnode *H = dir_obj->head;
+	dir_obj->head = (struct Lnode *)malloc(sizeof(struct Lnode)); 
+//	dir_obj->head = NULL;
 	dir_handler((void *)dir_obj);
-	//free(H);
+	printf("whoops");	
 	printLL(dir_obj);
 	free(dir_obj);
 	return 1;
@@ -59,8 +61,11 @@ int main(int argc, char * argv[]){
 
 
 void printLL(struct thread_arg * arg){
-  puts("in printLL");
-  while(arg->head!=NULL){
+ // puts("in printLL");
+	if( arg->head==NULL){ 
+		printf("not good\n");
+	}
+	while(arg->head!=NULL){
     printf("current filename: %s\n", (arg->head)->file_handle);
     arg->head = (arg->head)->next_list;
   }
@@ -119,16 +124,19 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
 //if(arg->head==NULL) { puts("yessss");} 
   char *string;
-  struct Tnode *token_list_head;
-  pthread_mutex_lock(arg->lock);
+  
+	struct Tnode *token_list_head;
+  
+	pthread_mutex_lock(arg->lock);
   addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
   pthread_mutex_unlock(arg->lock);
-  //  token_list_head=tokenize(string);
+  
+	//  token_list_head=tokenize(string);
 free(string);
 free(arg);
-free(newLnode);
+//free(newLnode);
 pthread_exit(0);
 }
 
@@ -155,8 +163,7 @@ void * dir_handler(void * dir_info){
 	pthread_t thread2; // handles calls to file handler
 	struct thread_arg * sub_dir_arg2 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
 	struct thread_arg * sub_dir_arg1 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
-//	pthread_mutex_t file_lock;
-//	pthread_mutex_init(&file_lock,NULL);
+	
 	while(file != NULL){
 		
 		if(file->d_name[0]!='.'){
@@ -182,7 +189,6 @@ void * dir_handler(void * dir_info){
 				}   
 				 
 
-			//	printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
@@ -195,7 +201,6 @@ void * dir_handler(void * dir_info){
 				sub_dir_arg->head = arg->head;
 				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
-//				printf("hold path %s\n",hold);
 				
 			} 
 		else if(file->d_type == DT_REG){ // checks if current object is a file
@@ -232,7 +237,6 @@ void * dir_handler(void * dir_info){
 				sub_dir_arg->head = arg->head;
 				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
 					
-				//printf("%s\n",file->d_name);
 			
 		 } 
 	}
@@ -254,9 +258,7 @@ void * dir_handler(void * dir_info){
 	pthread_join(thread,NULL);
 	pthread_join(thread2,NULL);
 	pthread_attr_destroy(&threadAttr);
-	//free(sub_dir_arg1);
-	//free(sub_dir_arg2);
-     	//free(arg);
+     	free(arg);
 	pthread_exit(0);
 }
 
