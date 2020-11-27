@@ -50,8 +50,7 @@ int main(int argc, char * argv[]){
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
-	dir_obj->head = (struct Lnode *)malloc(sizeof(struct Lnode)); 
-//	dir_obj->head = NULL;
+	dir_obj->head = (struct Lnode *)malloc(sizeof(struct Lnode));
 	dir_handler((void *)dir_obj);
 	printf("whoops");	
 	printLL(dir_obj);
@@ -97,12 +96,17 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
  if(Head==NULL) { puts("yessss, head is null");}
 
  if(Head!=NULL){
-   struct Lnode *temp = Head;
-   printf("temp node %s\n", temp->file_handle);
-   Head = newLnode;
-   printf("list head %s\n", Head->file_handle);
-   Head->next_list = temp;
-   printf("next item %s\n",(Head->next_list)->file_handle);
+    struct Lnode *temp = Head;
+   //printf("temp node %s\n", temp->file_handle);
+   //Head = newLnode;
+   //printf("list head %s\n", Head->file_handle);
+    struct Lnode *prev = NULL;
+   while(temp!=NULL){
+     prev = temp;
+     temp = temp->next_list;
+   }
+   prev->next_list = newLnode;
+   printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
    //   printf("adding to head of the non-empty list, filename: %s\n", (arg->list_head)->file_handle);                                                                                   
  }
  else{
@@ -123,11 +127,9 @@ void * file_handler(void * file_info){
 struct thread_arg *arg  = (struct thread_arg *)file_info;
 struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
 //if(arg->head==NULL) { puts("yessss");} 
-  char *string;
-  
-	struct Tnode *token_list_head;
-  
-	pthread_mutex_lock(arg->lock);
+  char *string; 
+  struct Tnode *token_list_head;
+  pthread_mutex_lock(arg->lock);
   addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
@@ -161,8 +163,8 @@ void * dir_handler(void * dir_info){
 	pthread_t thread;	// handles calls to dir handler 
 
 	pthread_t thread2; // handles calls to file handler
-	struct thread_arg * sub_dir_arg2 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
-	struct thread_arg * sub_dir_arg1 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
+	//	struct thread_arg * sub_dir_arg2 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
+	//struct thread_arg * sub_dir_arg1 = (struct thread_arg *)malloc(sizeof(struct thread_arg));
 	
 	while(file != NULL){
 		
@@ -259,7 +261,7 @@ void * dir_handler(void * dir_info){
 	pthread_join(thread2,NULL);
 	pthread_attr_destroy(&threadAttr);
      	free(arg);
-	pthread_exit(0);
+	return NULL;
 }
 
 
