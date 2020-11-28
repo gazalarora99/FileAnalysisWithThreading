@@ -66,7 +66,7 @@ return result;
 	  }
 	  i++;
       }
-      
+      word[len] = '\0';
 	return word;
    }
   

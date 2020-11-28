@@ -121,8 +121,9 @@ char* input(struct thread_arg * arg, int fd){
   }
   off_t off = lseek(fd, 0, SEEK_END);
   //printf("size of file %llu\n", (long long int) off);
-  char *buf = malloc(sizeof(char) * ((int)off));
+  // char *buf = malloc(sizeof(char) * ((int)off + 1));
   int size = (int) off;
+  char *buf = malloc(sizeof(char) * (size + 1));
   off= lseek(fd,0,SEEK_SET);
   //printf("new offset %llu\n", (long long int) off);
   int bytes, pos;
@@ -130,6 +131,7 @@ char* input(struct thread_arg * arg, int fd){
     //printf("read %d bytes\n", bytes);
     printf("%s\n", buf);
   }
+  buf[size] = '\0';
   return buf;
 }
 
