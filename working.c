@@ -130,14 +130,18 @@ char* input(struct thread_arg * arg, int fd){
 
 
 void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
- if(arg->list_head == NULL){ 
+
+if(arg->list_head == NULL){ 
  	return;
  }
  newLnode->file_handle=arg->path;
  newLnode->token_list = NULL;
+ newLnode->next_list = NULL;
  newLnode->num_tokens = 0;
  struct Lnode *H= arg->list_head;
+ 
  if(H==NULL) { puts("yessss, head is null");}
+
 
  if(H!=NULL){
     struct Lnode *ptr = H;
@@ -146,11 +150,19 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
    //printf("list head %s\n", Head->file_handle);
    // struct Lnode *prev = NULL;
    
+	 
 	 while(ptr->next_list!=NULL){
      ptr = ptr->next_list;
    }
-   ptr->next_list = newLnode;
-   //printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
+  	//	printf("is it true %ld",ptr->next_list);
+
+//	if(ptr == NULL){ 
+//		printf(" \t \t WOEAODASDFASF \n");
+//	}
+	 ptr->next_list = newLnode;
+   
+	 
+	 //printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
    //   printf("adding to head of the non-empty list, filename: %s\n", (arg->list_head)->file_handle);                                                                                   
  	return;
  }
@@ -251,7 +263,7 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
   char *string; 
   struct Tnode *token_list_head;
   pthread_mutex_lock(arg->lock);
-//  addToList(arg, newLnode);
+  addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
   pthread_mutex_unlock(arg->lock);
@@ -299,7 +311,7 @@ struct thread_node * idIns(pthread_t * id, struct thread_node * list){
 	}
 	
 
- printf("we went here\n");
+// printf("we went here\n");
  
  struct thread_node * ptr = list;
  	while(ptr->nextId!=NULL){ 
@@ -455,7 +467,7 @@ void * dir_handler(void * dir_info){
 //	pthread_join(thread2,NULL);
 	// pthread_attr_destroy(&threadAttr);
 	free(arg);
-	print_Id_list(id_list);
+//	print_Id_list(id_list);
 //	return NULL ;
 	pthread_exit(0);
 }
