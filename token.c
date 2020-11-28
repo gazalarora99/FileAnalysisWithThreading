@@ -76,7 +76,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
   //  struct Tnode* head;
   //head = tokenList;
   //  if(head==NULL) puts("head is null");
-  if(tokenList==NULL) puts ("tokenList is null");
+  //  if(tokenList==NULL) puts ("tokenList is null");
   tokenList = malloc(sizeof(struct Tnode));
   tokenList->token="";
   tokenList->next_token=NULL;

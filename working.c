@@ -72,7 +72,10 @@ int main(int argc, char * argv[]){
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
 	dir_obj->list_head = (struct Lnode *)malloc(sizeof(struct Lnode));
-
+	(dir_obj->list_head)->file_handle = "";
+	(dir_obj->list_head)->num_tokens=0;
+	(dir_obj->list_head)->token_list = NULL;
+	(dir_obj->list_head)->next_list = NULL;
 
 	
 	pthread_attr_t	threadAttr2;		
@@ -82,7 +85,7 @@ int main(int argc, char * argv[]){
 	
 	pthread_create(&parent,&threadAttr2,dir_handler, (void *)dir_obj);
  
- 	printf("parent Id %ld\n",parent); 
+ 	//printf("parent Id %ld\n",parent); 
 
 	pthread_join(parent,NULL); 
 
@@ -117,7 +120,7 @@ void printLL(struct thread_arg * arg){
 
 char* input(struct thread_arg * arg, int fd){
   if (fd>=0) {
-    printf("file %s opened\n", arg->path);
+    printf("\nfile %s opened\n", arg->path);
   }
   off_t off = lseek(fd, 0, SEEK_END);
   //printf("size of file %llu\n", (long long int) off);
@@ -130,7 +133,7 @@ char* input(struct thread_arg * arg, int fd){
   buf[size] = '\0';
   while((bytes=read(fd,buf,size)) > 0){
     //printf("read %d bytes\n", bytes);
-    printf("%s\n", buf);
+    printf("File's data\n%s", buf);
   }
   //  buf[size] = '\0';
   return buf;
@@ -148,10 +151,18 @@ if(arg->list_head == NULL){
  newLnode->num_tokens = 0;
  struct Lnode *H= arg->list_head;
  
- if(H==NULL) { puts("yessss, head is null");}
+ // if(H==NULL) { puts("yessss, head is null");}
 
 
- if(H!=NULL){
+ if(strcmp(H->file_handle, "")==0){
+   H->file_handle = newLnode->file_handle;
+   H->token_list = tokenize(string, newLnode->token_list);
+   H->next_list = newLnode->next_list;
+   H->num_tokens = newLnode->num_tokens;
+   //   printf("adding first node to file list, filename: %s\n", H->file_handle);
+ }
+ 
+ else {
     struct Lnode *ptr = H;
    //printf("temp node %s\n", temp->file_handle);
    //Head = newLnode;
@@ -169,20 +180,9 @@ if(arg->list_head == NULL){
 //	}
 	 ptr->next_list = newLnode;
 	 (ptr->next_list)->token_list =  tokenize(string, newLnode->token_list);
-	 
-	 //printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
-   //   printf("adding to head of the non-empty list, filename: %s\n", (arg->list_head)->file_handle);                                                                                   
- 	return;
+	 //	 printf("added current item %s\n",(ptr->next_list)->file_handle);
+	return;
  }
- else{
-   //   newLnode->next_list= NULL;                                                                                                                                                       
-   //   if(newLnode==NULL) { puts("yessss");}                                                                                                                                            
-   H = newLnode;
-   //   Head->next_list = NULL;                                                                                                                                                          
-   printf("adding first node to file list, filename: %s\n", H->file_handle);
- }
- //return Head->token_list;
-  
 }
 
 
@@ -269,7 +269,7 @@ struct thread_arg *arg  = (struct thread_arg *)file_info;
 struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
 //if(arg->head==NULL) { puts("yessss");} 
   char *string; 
-  struct Tnode *token_list_head;
+  //struct Tnode *token_list_head;
   pthread_mutex_lock(arg->lock);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
@@ -394,7 +394,7 @@ void * dir_handler(void * dir_info){
 				 
 
 				//char * concat_path = strcat()
-				printf("dir path %s \n",concat_path);
+				//				printf("dir path %s \n",concat_path);
 				/*
 				 	above two for loops concatenate new address on  
 					decided to do concat myself so that I can keep track of the addresses that I am
