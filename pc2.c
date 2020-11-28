@@ -11,6 +11,7 @@
 struct Tnode{  // token node for linked list of tokens                                                                                                                                   
 char * token;
 double prob;
+  int occur;
 struct Tnode * next_token;
 };
 
@@ -32,7 +33,7 @@ struct thread_arg{ // this argument stuct is passed to pthread_create so our rou
 void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
 char * input(struct thread_arg * arg, int fd);
-void addToList(struct thread_arg * arg, struct Lnode * Head);
+void addToList(struct thread_arg * arg, struct Lnode * H);
 void printLL(struct thread_arg * arg);
 
 

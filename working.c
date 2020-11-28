@@ -12,7 +12,8 @@
 struct Tnode{  // token node for linked list of tokens                                                                                                                                                                                        
 char * token;
 double prob;
-struct Tnode * next_token;
+  int occur;
+  struct Tnode * next_token;
 };
 
 
@@ -26,7 +27,7 @@ struct Lnode * next_list;
 struct thread_arg{ // this argument stuct is passed to pthread_create so our routine has access to the right arguments 
 	pthread_mutex_t * lock;
 	char * path;	
-        struct Lnode *head;
+        struct Lnode *list_head;
 }; 
 
 struct thread_node{ 
@@ -65,7 +66,7 @@ int main(int argc, char * argv[]){
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
-	dir_obj->head = (struct Lnode *)malloc(sizeof(struct Lnode));
+	dir_obj->list_head = (struct Lnode *)malloc(sizeof(struct Lnode));
 
 
 	
@@ -100,12 +101,12 @@ int main(int argc, char * argv[]){
 void printLL(struct thread_arg * arg){
  // puts("in printLL");
 	struct thread_arg * ptr = arg;
-	if( ptr->head==NULL){ 
+	if( ptr->list_head==NULL){ 
 		printf("not good\n");
 	}
-	while(ptr->head!=NULL){
-    printf("current filename: %s\n", (ptr->head)->file_handle);
-    ptr->head = (ptr->head)->next_list;
+	while(ptr->list_head!=NULL){
+    printf("current filename: %s\n", (ptr->list_head)->file_handle);
+    ptr->list_head = (ptr->list_head)->next_list;
   }
 }
 
@@ -129,17 +130,17 @@ char* input(struct thread_arg * arg, int fd){
 
 
 void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
- if(arg->head == NULL){ 
+ if(arg->list_head == NULL){ 
  	return;
  }
  newLnode->file_handle=arg->path;
  newLnode->token_list = NULL;
  newLnode->num_tokens = 0;
- struct Lnode *Head = arg->head;
- if(Head==NULL) { puts("yessss, head is null");}
+ struct Lnode *H= arg->list_head;
+ if(H==NULL) { puts("yessss, head is null");}
 
- if(Head!=NULL){
-    struct Lnode *ptr = Head;
+ if(H!=NULL){
+    struct Lnode *ptr = H;
    //printf("temp node %s\n", temp->file_handle);
    //Head = newLnode;
    //printf("list head %s\n", Head->file_handle);
@@ -156,9 +157,9 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
  else{
    //   newLnode->next_list= NULL;                                                                                                                                                       
    //   if(newLnode==NULL) { puts("yessss");}                                                                                                                                            
-   Head = newLnode;
+   H = newLnode;
    //   Head->next_list = NULL;                                                                                                                                                          
-   printf("adding first node to file list, filename: %s\n", Head->file_handle);
+   printf("adding first node to file list, filename: %s\n", H->file_handle);
  }
  //return Head->token_list;
   
@@ -382,7 +383,7 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path;
 				sub_dir_arg->lock = arg->lock;
-				sub_dir_arg->head = arg->head;
+				sub_dir_arg->list_head = arg->list_head;
 				pthread_t  *ptr = (pthread_t * )malloc(sizeof(pthread_t));
 				pthread_create(ptr, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
@@ -424,7 +425,7 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path2;
 				sub_dir_arg->lock = arg->lock;
-				sub_dir_arg->head = arg->head;
+				sub_dir_arg->list_head = arg->list_head;
 				pthread_t * ptr = (pthread_t * )malloc(sizeof(pthread_t));
 				
 				pthread_create(ptr, &threadAttr, file_handler, (void *)(sub_dir_arg) );

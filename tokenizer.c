@@ -1,15 +1,50 @@
+
+/*
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <pc2.c>
+*/
+#include "tokenizer.h"
+/*
+struct Token{
+char *token_string;
+enum token_type token_type;
+char *optional_c_operator_type;
+struct Token *next;
+int alreadyPrinted;
+};
 
 enum token_type {Integer, Word, Hexadecimal, Octal, FloatingPoint, COperator, CKeyword, SingleQuote, DoubleQuote};
+char* getTokenTypeFromEnum(enum token_type tt);
+int Delimiter_present(char c);
+struct Token* addTokentoLinkedList(struct Token* token);
+struct Token* createToken(char *token_string, enum token_type tt);
+void freeLinkedList(struct Token* head);
+int isWord(char *string);
+int isHex(char* string);
+int isPossibleHex(char *string);
+int isOctal(char *string);
+int isFloat(char *string);
+int isPossibleFloat(char *string);
+int isInt(char *string);
+char* isC_Operator(char *string);
+int isCKeyword(char* string);
+char* createSubstring(char* string, int beginIndex, int endIndex);
+struct Token* add_viable_tokens_to_linkedlist(char* currentstring);
+void printToken(struct Token* token);
+int getTokenInQuotes(char* string, int begin, char quote);
+int skipComments(char* string, int c1, int c2, char slash, char slash_or_star);
+int Invalid_Token(char c, int substring_index, char* input);
+
+*/
 
 
 /*Function takes a token_type enum
  *and returns a pointer to the string that it represents
  */
+//enum token_type {Integer, Word, Hexadecimal, Octal, FloatingPoint, COperator, CKeyword, SingleQuote, DoubleQuote};
 char* getTokenTypeFromEnum(enum token_type tt){
 
 char *tokentype = malloc(sizeof(char)*30);
@@ -30,7 +65,7 @@ return tokentype;
 }
 
 
-
+/*
 struct Token{
 char *token_string;
 enum token_type token_type;
@@ -38,14 +73,17 @@ char *optional_c_operator_type;
 struct Token *next;
 int alreadyPrinted;
 };
+*/
+
 struct Token* head = NULL;
 
 //Function to check if delimiter is present,
 //return 1 for true and 0 for false
 int Delimiter_present(char c){
   
-  if((c==' ') || (c=='\n') || (c=='\t') || (c=='\v') || (c=='\r') || (c=='\f')){
-     return 1;
+  //if((c==' ') || (c=='\n') || (c=='\t') || (c=='\v') || (c=='\r') || (c=='\f')){
+if((c==' ') || (c=='\n')){
+    return 1;
   }
   return 0;
 }
@@ -100,15 +138,35 @@ and is allowed to have alphanumeric characters
 following the first alphabet
 return 1 for true, 0 for false */
 int isWord(char *string){
-  int i = 1;
+  int k=1,j=1,i = 1;
+  /*    if(string[0]=='-'){
+    while(string[j]!='\0'){
+      if(string[j]!='-'){
+	//not hyphen word
+	k=0;
+	break;
+      }
+      j++;
+    }
+    if(k==1){
+      return 1;
+    }
+  }
+  */
   //checks if first character is an alphabet
   if(isalpha(string[0])==0){
-    return 0;
+  return 0;
   }
+
+  
   while(string[i]!='\0'){
+    /*    if(string[(strlen(string))-2]=='\'') {
+      i++;
+      continue;
+      }
     //checks if the following character are alphanumeric
     //if a non-alphanumeric character is found then loop terminates to end the token there
-    if(isalnum(string[i])==0){
+    */if(isalnum(string[i])==0){
       //printf("end of word");
       return 0;
     }
@@ -342,20 +400,19 @@ char *c_op = malloc(sizeof(char)*50);
 //c_operator_struct->operator_name="";
 
 c_op = "";
-
+/*
 int i = 0;	
 //char c = string[0];
 
 //printf("ignore: %s\n", c_op);
 //printf("%c\n", c);
 
-
 //if the string is length one, choose from possible operators
 if (strlen(string)==1){
 
 //c_operator_struct->operator_length=1;
 switch(string[i]) {
-	case '(':
+  	case '(':
 		//puts("found left parenthesis");
 		c_op = "left parenthesis";	
 		return c_op;
@@ -412,10 +469,10 @@ switch(string[i]) {
 	case '&':
 		c_op = "AND/address operator";
 		return c_op;
-	case '-':
-		c_op = "minus/subtract operator";
+  	case '-':
+		c_op = "hyphen";
 		return c_op;
-	case '*':
+			case '*':
 		c_op = "multiply/dereference operator";
 		return c_op;
         case '%':
@@ -460,7 +517,7 @@ c_op = "increment";
 return c_op;
 }
 if ((c1 =='-') && (c2 == '-')){
-c_op = "decrement";
+c_op = "hyphens";
 return c_op;
 }
 
@@ -520,7 +577,6 @@ if ((c1 =='|') && (c2 == '=')){
 c_op = "bitwise OR equals";
 return c_op;
 }
-
 //c_operator_struct->operator_length=0;
 return c_op;
 }
@@ -535,8 +591,8 @@ char c1 = string[0];
 char c2 = string[1];
 char c3 = string[2];
 	
-if ((c1 =='>') && (c2 == '>') && (c3=='=')) {
-c_op = "shift right equals";
+if ((c1 =='-') && (c2 == '-') && (c3=='-')) {
+c_op = "hyphens";
 return c_op;
 }
 
@@ -545,9 +601,8 @@ c_op = "shift left equals";
 return c_op;
 }
 
-
-
 }
+
 if(strlen(string)==(6)){
 
 if(strcmp(string, "sizeof")==0){
@@ -556,10 +611,9 @@ return c_op;
 }
 
 }
-
   //c_operator_struct->operator_length=0;
   //return c_operator_struct;
-	return c_op;
+*/	return c_op;
 }
 
 int isCKeyword(char* string){
@@ -663,12 +717,14 @@ if (isWord(currentstring)){
 //puts("found word");
 struct Token *word_token = createToken(currentstring, Word);
 head = addTokentoLinkedList(word_token);
-}
+ }
+
 if(isCKeyword(currentstring)){
 //puts("found C Keyword");
 struct Token *c_keyword_token = createToken(currentstring, CKeyword);
 head = addTokentoLinkedList(c_keyword_token);
 }
+
 if(isInt(currentstring)){
 //puts("found int");
 struct Token *int_token = createToken(currentstring, Integer);
@@ -712,22 +768,26 @@ return head;
  *of a token, given a pointer to it
  *for null token, will return without printing
  */
-void printToken(struct Token* token){
+char* printToken(struct Token* token){
 if(token==NULL){
-return;
+return NULL;
 }
-//printing a c operator token type
+//prin
+/*ting a c operator token type
 if ((token->optional_c_operator_type)!=NULL){
 printf("%s: ", token->optional_c_operator_type);
-}
+printf("\"%s\"\n", token->token_string);
+}*/
 
-else{
+if (strcmp((getTokenTypeFromEnum(token->token_type)) , "word")==0){
 //print any other token type	
 printf("%s: ", getTokenTypeFromEnum(token->token_type));
-}
-
-//printing token string
 printf("\"%s\"\n", token->token_string);
+ return token->token_string;
+}
+ return NULL;
+//printing token string
+//printf("\"%s\"\n", token->token_string);
 //printf("token length, i: %i\n", i);
 }
 
@@ -798,15 +858,35 @@ int Invalid_Token(char c, int substring_index, char* input){
   }
   char* str = isC_Operator(currentItem);
   if(isWord(currentItem) || isCKeyword(currentItem) || isInt(currentItem) || isFloat(currentItem) || isHex(currentItem) || isOctal(currentItem) || strlen(str)!=0 ){
-    //    puts("found type");
+    //if(isWord(currentItem) || strlen(str)>=0 ){
+  //    puts("found type");
     return 1;
   }
   //  puts("found invalid token");
   return 0;
 }
 
+
+void addToken(char* newStr, struct Tnode *Tlist){
+
+  struct Tnode *newTnode = (struct Tnode) malloc(sizeof(struct Tnode));
+  newTnode->token = newStr;
+  newTnode->occur = 1;
+  newTnode->next_token = NULL;
+
+  struct Tnode *prev = NULL, curr = Tlist;
+
+  while(curr!=NULL){
+    prev = curr;
+    curr = curr->next_token;
+  }
+    
+  
+}
+
+
 //int main(int argc, char** argv){
-void tokenize(char* string){
+void tokenize(char* string, struct Tnode *tokenList){
   /*if (argc!=2){
   puts("Invalid number of arguments");
   return 1;
@@ -837,9 +917,11 @@ char* currentstring;
 //iterate through input string char by char until the null terminator
 //currentstring = createSubstring(inputString, beginSubstringIndex, i);
  int quote_present = 0;
+ char * newToken = (char*) malloc(sizeof(char));
 while(inputString[i]!='\0'){
   //struct Token* oldhead = head;
   //check for comments and function call to skip them
+  /*
   if((inputString[i]=='/' && inputString[i+1]=='*') || (inputString[i]=='/' && inputString[i+1]=='/')){
     if(head!=NULL) {
       if(head->alreadyPrinted==0){
@@ -888,28 +970,37 @@ while(inputString[i]!='\0'){
       quote_present++;
     }
   }
-  
+  */
  currentstring = createSubstring(inputString, beginSubstringIndex, i);
  
   if(Delimiter_present(inputString[i])==1){
     //  puts("delimiter");
+    /*if(head!=NULL){
+        if(head->alreadyPrinted==0){
+        printToken(head);
+        head->alreadyPrinted=1;
+      }
+     }*/
   i++;
   beginSubstringIndex++;
   continue;
   }
 
   //checks if a character is a non-token and skips it
-    if(Invalid_Token(inputString[i], i,inputString)==0){
+  if(Invalid_Token(inputString[i], i,inputString)==0){
       if(head!=NULL){
         if(head->alreadyPrinted==0){
-        printToken(head);
+        newToken = printToken(head);
+	addToken(newToken, tokenList);
         head->alreadyPrinted=1;
       }
      }
       // printf("non token index at %d\n", i);
-    beginSubstringIndex=i+1;
+       beginSubstringIndex=i+1;
     i+=1;
     //printf("restart at %d\n", i);
+    
+     
     continue;
     }
 
@@ -982,7 +1073,8 @@ free(possible_hex);
 
  if(head!=NULL){
  if(head->alreadyPrinted==0){
- printToken(head);
+ newToken = printToken(head);
+ addToken(newToken, tokenList);
  head->alreadyPrinted=1;
  }
  }
@@ -1000,7 +1092,8 @@ i++;
 
  if(head!=NULL){
    if(head->alreadyPrinted==0){
-   printToken(head);
+   newToken =  printToken(head);
+   addToken(newToken, tokenList);
    head->alreadyPrinted=1;
    }
  }
