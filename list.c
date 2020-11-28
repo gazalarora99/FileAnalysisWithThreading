@@ -9,7 +9,7 @@
 #include <fcntl.h>
 #include <ctype.h> 
 */
-
+#include <sys/stat.h>
 #include "tokenizer.h"
 
 /*
@@ -60,9 +60,18 @@ struct thread_node * ThreadList = NULL;
 
 int main(int argc, char * argv[]){ 
 
+  if(argc!=2){
+    printf("Error: Invalid number of arguments\n");
+  }
 
 	char * dir_handle  = argv[1]; 
 
+	struct stat stats;
+	stat(dir_handle,&stats);
+	if(!(S_ISDIR(stats.st_mode))){
+	  printf("Error: Given path is not a directory\n");
+	  return 0;
+	}
 
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
@@ -86,7 +95,6 @@ int main(int argc, char * argv[]){
 	pthread_create(&parent,&threadAttr2,dir_handler, (void *)dir_obj);
  
  	printf("parent Id %ld\n",parent); 
-
 	pthread_join(parent,NULL); 
 
 	struct thread_node * ptr = ThreadList;
@@ -98,6 +106,14 @@ int main(int argc, char * argv[]){
 	} 
 //	dir_handler((void *)dir_obj);
 
+	if(strcmp((dir_obj->list_head)->file_handle,"")==0){
+	  printf("nothing added to shared structure\n");
+	  return 0;
+	}
+	//sort data structure based on number of tokens, emit an error & stop if a single file is there
+	//call to make mean token list
+	//use mean list and each file's token list to compute each file's KLD
+	
         printLL(dir_obj);
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
@@ -168,7 +184,9 @@ if(arg->list_head == NULL){
    // struct Lnode *prev = NULL;
    
 	 
-	 while(ptr->next_list!=NULL){
+
+
+        while(ptr->next_list!=NULL){
          ptr = ptr->next_list;
 	 }
   	//	printf("is it true %ld",ptr->next_list);
@@ -370,7 +388,7 @@ void * dir_handler(void * dir_info){
 	
 	while(file != NULL){
 		
-		if(file->d_name[0]!='.'){
+	  if(strcmp(file->d_name, ".")!=0 && strcmp(file->d_name, "..")!=0){
 			if(file->d_type == DT_DIR){ // checks if current object is a directory
 				
 				int arg_p = strlen(arg->path); 

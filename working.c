@@ -322,6 +322,7 @@ while(ptr->next_list!=NULL){
 			while(mean_list_ptr!=NULL){ 
 								
 				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
+				
 				printf(" %lf \n", mean_list_ptr->prob);
 				mean_list_ptr = mean_list_ptr->next_token;
 				

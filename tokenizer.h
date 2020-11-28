@@ -7,6 +7,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <math.h>
+
+
 //#include "tokenizer.h"
 
 struct Tnode{  // token node for linked list of tokens                                                                                                                                                                         
