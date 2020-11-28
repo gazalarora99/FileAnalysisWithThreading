@@ -20,7 +20,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList);
 void tokenize(char* string, struct Tnode* tokenList);
 */
 
-struct Tnode* head = NULL; // my edit
+struct Tnode* head; // my edit
 
 int Delimiter_present(char c){
   
@@ -74,6 +74,14 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
   //  struct Token* head = NULL;
   //  tokenList = head;
   //  struct Tnode* head;
+  head = tokenList;
+  //  if(head==NULL) puts("head is null");
+  if(tokenList==NULL) puts ("tokenList is null");
+  tokenList = malloc(sizeof(struct Tnode));
+  tokenList->token="";
+  tokenList->next_token=NULL;
+  tokenList->occur = 0;
+  tokenList->prob = 0.0;
   int i = 0, j = 0, hyphens = 0;
   char * substring;
      char * words;
@@ -159,9 +167,12 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList){
   struct Tnode* prev;
   struct Tnode* curr;
 
-  if(tokenList==NULL){
+  if(strcmp(tokenList->token, "")==0){
       //head = nw;
-      tokenList = nw;
+      tokenList->token = nw->token;
+      tokenList->occur = nw->occur;
+      tokenList->next_token = nw->next_token;
+      tokenList->prob = nw->prob;
 			//      total= total+head->occur;
       //  if(head==NULL) puts("head still null");
       //printf("first token %s\n", head->token);
@@ -176,7 +187,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList){
 
      	while(curr->next_token!=NULL){
 					if(strcmp(curr->next_token->token, nw->token)==0){
-	 				 			curr->occur++;
+					  curr->next_token->occur++;
 	 							return;
 					}
 					
