@@ -20,7 +20,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList);
 void tokenize(char* string, struct Tnode* tokenList);
 */
 
-struct Tnode* head; // my edit
+//struct Tnode* head; // my edit
 
 int Delimiter_present(char c){
   
@@ -74,7 +74,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
   //  struct Token* head = NULL;
   //  tokenList = head;
   //  struct Tnode* head;
-  head = tokenList;
+  //head = tokenList;
   //  if(head==NULL) puts("head is null");
   if(tokenList==NULL) puts ("tokenList is null");
   tokenList = malloc(sizeof(struct Tnode));
