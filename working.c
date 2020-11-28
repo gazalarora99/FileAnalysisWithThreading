@@ -55,6 +55,10 @@ void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
 void print_Id_list(struct thread_node * list);
 */
+double probability_calc(char * token ,struct Tnode * L1, struct Tnode * L2); 
+
+void complete_output(struct thread_arg * input ); 
+
 
 struct thread_node * ThreadList = NULL;  
 
@@ -97,8 +101,9 @@ int main(int argc, char * argv[]){
 		ptr = ptr->nextId;
 	} 
 //	dir_handler((void *)dir_obj);
-
+				complete_output(dir_obj);
         printLL(dir_obj);
+
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
 	printf("wowza\n");
@@ -186,72 +191,68 @@ if(arg->list_head == NULL){
 }
 
 
-
-struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob){ 
-/* insert nodes in alphabetical order 
-need to free this all later since this memory is dynamically allocated
-We want to make sure that the inserted tokens are unique and not duplicates
-*/	
-		if(shared_struct == NULL){ 
-						struct Tnode * head  =  (struct Tnode *)malloc(sizeof(struct Tnode)); 
-						head->token = token;
-						head->prob = prob;
-						head->next_token = NULL;
-						return head;
-				} 
-				else{ 
-						struct Tnode * ptr = shared_struct;
-						int flag = 0;
-						
-						if( *(ptr->token) > *token){ 
-							struct Tnode * new_head = (struct Tnode *)malloc(sizeof(struct Tnode)); 
-							new_head->token = token; 
-							new_head->prob = prob;
-							new_head->next_token = ptr; 
-							return ptr;
-						} 
-
-						while(ptr->next_token != NULL){ 
-								
-								if(*(ptr->next_token->token) > *token){ 
-											flag = 1;
-											break;
-											
-									}
-								
-								ptr = ptr->next_token;
-						}
-
-						
-						if(flag){
-							struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));
-							new_node->token = token;
-							new_node->prob = prob;
-							
-							struct Tnode * hold; 
-
-							hold = ptr->next_token;
-							ptr->next_token = new_node;
-							new_node->next_token = hold;
-							return shared_struct;
-						} 
-						else{ 
-								struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));			
-								new_node->token = token; 
-								new_node->prob = prob; 
-								ptr->next_token = new_node; 
-								return shared_struct;
-						}
+double probability_calc( char * token ,struct Tnode * L1, struct Tnode * L2){ 
 
 
+struct Tnode * ptr = L1; 
+struct Tnode * ptr2 = L2; 
+
+double p1 = 0.0; 
+double p2 = 0.0; 
+
+
+				while(ptr!= NULL){ 
+					if(strcmp(ptr->token, token) == 0){ 
+							p1 = ptr->prob;
+							break;
+					}
+					ptr = ptr->next_token;
 				}
 				
+				while(ptr2!= NULL){ 
+					if(strcmp(ptr2->token, token) == 0){ 
+							p2 = ptr2->prob;
+							break;
+					}
+					ptr2 = ptr2->next_token;
+				}
 
 
+return (p1 + p2)/2;
+
+}
 
 
+struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob){ 
+/* insert LL nodes into the mean linked list*/	 
 
+	if(shared_struct == NULL){ 
+			shared_struct  = (struct Tnode *)malloc(sizeof(struct Tnode)); 
+			shared_struct->token = token; 
+			shared_struct->prob = prob; 
+			shared_struct->next_token = NULL;
+			return shared_struct;
+	}
 
+	struct Tnode * ptr = shared_struct; 
+
+	if(strcmp(ptr->token,token)==0){ 
+				return ptr;
+	}
+	
+	while(ptr->next_token != NULL){ 
+				if(strcmp(ptr->token,token)==0){ 
+						return ptr;
+				}	
+				ptr = ptr->next_token;
+	}
+	
+	struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));
+	new_node->token = token; 
+	new_node->next_token = NULL;
+	ptr->next_token = new_node;
+	ptr->prob = prob; 
+	return shared_struct;
 }
 
 
@@ -285,6 +286,87 @@ free(arg);
 pthread_exit(0);
 
 }
+
+
+
+void complete_output(struct thread_arg * input){ 
+
+
+struct Lnode * ptr = input->list_head;
+struct Lnode * ptr2 = NULL;
+while(ptr->next_list!=NULL){ 
+	ptr2 = ptr->next_list;
+	
+	while(ptr2!=NULL){ 
+			
+			struct Tnode * list_ptr = ptr->token_list;	
+			struct Tnode * list_ptr2 = ptr2->token_list;
+			
+			struct Tnode * mean_list =  NULL;
+			mean_list = ordered_insert(mean_list ,list_ptr->token, list_ptr->prob);
+			
+			while(list_ptr!=NULL){ 
+				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
+				list_ptr = list_ptr->next_token;
+			}
+			
+			while(list_ptr2!=NULL){ 
+				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
+				list_ptr2 = list_ptr2->next_token;
+			}
+			
+			list_ptr = ptr->token_list; 
+			list_ptr2 = ptr2->token_list;
+			struct Tnode * mean_list_ptr = mean_list; 
+				
+			while(mean_list_ptr!=NULL){ 
+								
+				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
+				printf(" %lf \n", mean_list_ptr->prob);
+				mean_list_ptr = mean_list_ptr->next_token;
+				
+			} 
+			printf(" \n");
+		ptr2 = ptr2->next_list;
+	}
+
+	ptr = ptr->next_list;
+
+}
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   /*
