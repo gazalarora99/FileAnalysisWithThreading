@@ -127,11 +127,12 @@ char* input(struct thread_arg * arg, int fd){
   off= lseek(fd,0,SEEK_SET);
   //printf("new offset %llu\n", (long long int) off);
   int bytes, pos;
+  buf[size] = '\0';
   while((bytes=read(fd,buf,size)) > 0){
     //printf("read %d bytes\n", bytes);
     printf("%s\n", buf);
   }
-  buf[size] = '\0';
+  //  buf[size] = '\0';
   return buf;
 }
 
