@@ -92,11 +92,11 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
  newLnode->file_handle=arg->path;
  newLnode->token_list = NULL;
  newLnode->num_tokens = 0;
- struct Lnode *Head = arg->list_head;
- if(Head==NULL) { puts("yessss, head is null");}
+ struct Lnode *H = arg->list_head;
+ if(H==NULL) { puts("yessss, head is null");}
 
- if(Head!=NULL){
-    struct Lnode *temp = Head;
+ if(H!=NULL){
+    struct Lnode *temp = H;
    //printf("temp node %s\n", temp->file_handle);
    //Head = newLnode;
    //printf("list head %s\n", Head->file_handle);
@@ -112,9 +112,9 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
  else{
    //   newLnode->next_list= NULL;                                                                                                                                                       
    //   if(newLnode==NULL) { puts("yessss");}                                                                                                                                            
-   Head = newLnode;
+   H = newLnode;
    //   Head->next_list = NULL;                                                                                                                                                          
-   printf("adding first node to file list, filename: %s\n", Head->file_handle);
+   printf("adding first node to file list, filename: %s\n", H->file_handle);
  }
  //return Head->token_list;
   
