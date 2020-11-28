@@ -31,57 +31,25 @@ struct thread_arg{ // this argument stuct is passed to pthread_create so our rou
   struct Lnode *list_head;
 };
 
+struct thread_node{ 
+	pthread_t * id; // thread id 
+	struct thread_node * nextId;
+};
+
 void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
+struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob);
 char * input(struct thread_arg * arg, int fd);
 void addToList(struct thread_arg * arg, struct Lnode * H,char* string);
 void printLL(struct thread_arg * arg);
+struct thread_node * idIns(pthread_t * id, struct thread_node * list);
+void print_thread_list(struct thread_node * list);
 
-
-
-//#include "pc2.h"
-//#include <pc2.c>
-
-/*
-struct Token{
-char *token_string;
-enum token_type token_type;
-char *optional_c_operator_type;
-struct Token *next;
-int alreadyPrinted;
-};
-*/
-
-enum token_type {Integer, Word, Hexadecimal, Octal, FloatingPoint, COperator, CKeyword, SingleQuote, DoubleQuote};
-
-struct Token{
-char *token_string;
-enum token_type token_type;
-char *optional_c_operator_type;
-struct Token *next;
-int alreadyPrinted;
-};
-
-
-char* getTokenTypeFromEnum(enum token_type tt);
-int Delimiter_present(char c);
-struct Token* addTokentoLinkedList(struct Token* token);
-struct Token* createToken(char *token_string, enum token_type tt);
-void freeLinkedList(struct Token* head);
-int isWord(char *string);
-int isHex(char* string);
-int isPossibleHex(char *string);
-int isOctal(char *string);
-int isFloat(char *string);
-int isPossibleFloat(char *string);
-int isInt(char *string);
-char* isC_Operator(char *string);
-int isCKeyword(char* string);
-char* createSubstring(char* string, int beginIndex, int endIndex);
-struct Token* add_viable_tokens_to_linkedlist(char* currentstring);
-char* printToken(struct Token* token, struct Tnode* tokenList);
-int getTokenInQuotes(char* string, int begin, char quote);
-int skipComments(char* string, int c1, int c2, char slash, char slash_or_star);
-int Invalid_Token(char c, int substring_index, char* input);
-void tokenize(char* string, struct Tnode *tokenList);
-void addToken(char* newStr, struct Tnode* Tlist);
+ 
+int Delimiter_present(char c);                                                                                                                                                                                  
+char* createSubstring(char* string, int beginIndex, int endIndex);                                                                                                                                              
+char* isWord(char* string);                                                                                                                                                                                    void probability(struct Tnode* tokenList, int total); 
+void printLinkedList( struct Tnode* tokenList);                                                                                                                                                                  
+void addToTokens(struct Tnode* nw, struct Tnode* tokenList);                                                                                                                                                    
+struct Tnode* tokenize(char* string, struct Tnode* tokenList);   
+//void probability(struct Tnode* tokenList, int total);

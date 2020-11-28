@@ -1,4 +1,4 @@
-#include<stdlib.h>
+/*#include<stdlib.h>
 #include<stdio.h>
 #include<pthread.h>
 #include<string.h>
@@ -6,9 +6,10 @@
 #include<dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <ctype.h>
+#include <ctype.h> */
+#include "tokenizer.h"
 
-
+/*
 struct Tnode{  // token node for linked list of tokens                                                                                                                                                                                        
 char * token;
 double prob;
@@ -50,8 +51,9 @@ void addToList(struct thread_arg * arg, struct Lnode * Head);
 void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
 void print_Id_list(struct thread_node * list);
+*/
 
-
+struct thread_node * ThreadList = NULL;  
 
 int main(int argc, char * argv[]){ 
 
@@ -81,7 +83,7 @@ int main(int argc, char * argv[]){
 
 	pthread_join(parent,NULL); 
 
-	struct thread_node * ptr = id_list;
+	struct thread_node * ptr = ThreadList;
 //	dir_handler((void *)dir_obj);
 	
 	while(ptr!=NULL){ 
@@ -115,21 +117,21 @@ char* input(struct thread_arg * arg, int fd){
     printf("file %s opened\n", arg->path);
   }
   off_t off = lseek(fd, 0, SEEK_END);
-  printf("size of file %llu\n", (long long int) off);
+  //printf("size of file %llu\n", (long long int) off);
   char *buf = malloc(sizeof(char) * ((int)off));
   int size = (int) off;
   off= lseek(fd,0,SEEK_SET);
-  printf("new offset %llu\n", (long long int) off);
+  //printf("new offset %llu\n", (long long int) off);
   int bytes, pos;
   while((bytes=read(fd,buf,size)) > 0){
-    printf("read %d bytes\n", bytes);
+    //printf("read %d bytes\n", bytes);
     printf("%s\n", buf);
   }
   return buf;
 }
 
 
-void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
+void  addToList(struct thread_arg * arg, struct Lnode * newLnode, char* string){
 
 if(arg->list_head == NULL){ 
  	return;
@@ -152,15 +154,15 @@ if(arg->list_head == NULL){
    
 	 
 	 while(ptr->next_list!=NULL){
-     ptr = ptr->next_list;
-   }
+         ptr = ptr->next_list;
+	 }
   	//	printf("is it true %ld",ptr->next_list);
 
 //	if(ptr == NULL){ 
 //		printf(" \t \t WOEAODASDFASF \n");
 //	}
 	 ptr->next_list = newLnode;
-   
+	 (ptr->next_list)->token_list =  tokenize(string, newLnode->token_list);
 	 
 	 //printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
    //   printf("adding to head of the non-empty list, filename: %s\n", (arg->list_head)->file_handle);                                                                                   
@@ -255,7 +257,7 @@ void * file_handler(void * file_info){
 
 
 struct thread_arg *arg  = (struct thread_arg *)file_info;
-printf("file name %s\n",arg->path);
+//printf("file name %s\n",arg->path);
 
 
 struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
@@ -263,12 +265,13 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
   char *string; 
   struct Tnode *token_list_head;
   pthread_mutex_lock(arg->lock);
-  addToList(arg, newLnode);
+  //  addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
+  addToList(arg, newLnode, string);
   pthread_mutex_unlock(arg->lock);
-  
-	//  token_list_head=tokenize(string);
+  //tokenize(string, newLnode->token_list);
+  //  token_list_head=tokenize(string);
 free(string);
 
 free(arg);
@@ -328,7 +331,7 @@ struct thread_node * idIns(pthread_t * id, struct thread_node * list){
 
 }
 
-void print_Id_list(struct thread_node * list){ 
+void print_thread_list(struct thread_node * list){ 
 
 
 struct thread_node * ptr = list;
@@ -399,7 +402,7 @@ void * dir_handler(void * dir_info){
 				pthread_t  *ptr = (pthread_t * )malloc(sizeof(pthread_t));
 				pthread_create(ptr, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
-				id_list = idIns(ptr,id_list); 
+				ThreadList = idIns(ptr,ThreadList); 
 
 		//		printf("thread  name %ld \n",*ptr);
 //				printf("hold path %s\n",hold);
@@ -441,7 +444,7 @@ void * dir_handler(void * dir_info){
 				pthread_t * ptr = (pthread_t * )malloc(sizeof(pthread_t));
 				
 				pthread_create(ptr, &threadAttr, file_handler, (void *)(sub_dir_arg) );
-				id_list = idIns(ptr,id_list); 
+				ThreadList = idIns(ptr,ThreadList); 
 				
 			//	printf("thread 2 name %ld \n",*ptr); 
 				//printf("%s\n",file->d_name);
@@ -467,7 +470,7 @@ void * dir_handler(void * dir_info){
 //	pthread_join(thread2,NULL);
 	// pthread_attr_destroy(&threadAttr);
 	free(arg);
-//	print_Id_list(id_list);
+//	print_thread_list(ThreadList);
 //	return NULL ;
 	pthread_exit(0);
 }
