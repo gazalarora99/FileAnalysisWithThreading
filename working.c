@@ -1,4 +1,5 @@
-/*#include<stdlib.h>
+/*
+#include<stdlib.h>
 #include<stdio.h>
 #include<pthread.h>
 #include<string.h>
@@ -6,7 +7,9 @@
 #include<dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <ctype.h> */
+#include <ctype.h> 
+*/
+
 #include "tokenizer.h"
 
 /*
@@ -47,7 +50,7 @@ void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
 struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob);
 char * input(struct thread_arg * arg, int fd);
-void addToList(struct thread_arg * arg, struct Lnode * Head);
+void addToList(struct thread_arg * arg, struct Lnode * Head, char * string);
 void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
 void print_Id_list(struct thread_node * list);
@@ -265,14 +268,14 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
   char *string; 
   struct Tnode *token_list_head;
   pthread_mutex_lock(arg->lock);
-  //  addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
   addToList(arg, newLnode, string);
   pthread_mutex_unlock(arg->lock);
   //tokenize(string, newLnode->token_list);
   //  token_list_head=tokenize(string);
-free(string);
+
+//free(string);
 
 free(arg);
 

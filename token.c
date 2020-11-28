@@ -20,7 +20,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList);
 void tokenize(char* string, struct Tnode* tokenList);
 */
 
-struct Tnode* head;
+struct Tnode* head = NULL; // my edit
 
 int Delimiter_present(char c){
   
@@ -159,43 +159,38 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList){
   struct Tnode* prev;
   struct Tnode* curr;
 
-  if(head==NULL){
-      head = nw;
-      //      total= total+head->occur;
+  if(tokenList==NULL){
+      //head = nw;
+      tokenList = nw;
+			//      total= total+head->occur;
       //  if(head==NULL) puts("head still null");
       //printf("first token %s\n", head->token);
     }
     else{
-      curr = head;
-      prev = NULL;
-      //printf("in else, tryna put %s\n", newStr);
-      while(curr!=NULL){
-	//puts("in loop");
-	if(strcmp(curr->token, nw->token)==0){
-	  curr->occur++;
-	  return;
-	}
-	else if(strcmp(curr->token, nw->token)<0){
-	  // puts("less than if statement");
-	prev=curr;
-	//puts("after prev");
-        curr = curr->next_token;
-	//puts("after curr");
-	}
-        else if(strcmp(curr->token, nw->token)>0){
-	  //puts("grreater than if statement");
-	  prev->next_token = nw;
-          nw->next_token = curr;
-	  // printf("added %s\n", newStr);
-          return;
-	}
-	//printf("Curr token %s\n", prev->token);
-      }
-      //      puts("outside while");
-      prev->next_token = nw;
-      //puts("nw added to prev");
-      nw->next_token = NULL;
-      //printf("added %s\n", newStr);
+      curr = tokenList; // Charles edits below did the following edits below
+			
+			if(strcmp(curr->token,nw->token)==0){ 
+				curr->occur++;
+				return;
+			} 
+
+     	while(curr->next_token!=NULL){
+					if(strcmp(curr->next_token->token, nw->token)==0){
+	 				 			curr->occur++;
+	 							return;
+					}
+					
+					if(strcmp(curr->next_token->token, nw->token)>0){
+								break;
+							}
+		   		
+					curr = curr->next_token;
+			 } 
+					nw->next_token = curr->next_token; 
+					curr->next_token = nw;
+					
+      
+			//printf("added %s\n", newStr);
       //puts("nw's next is NULL");
       //printf("Last token %s\n", (prev->next_token)->token);
     }
@@ -205,7 +200,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList){
 
 void printLinkedList(struct Tnode* tokenList){
   int total = 0;
-  tokenList = head;
+ // tokenList = head;
   struct Tnode* prev = NULL;
       struct Tnode* curr = tokenList;
   if(tokenList==NULL){
