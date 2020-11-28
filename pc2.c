@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <ctype.h>
-//#include <tokenizer.h>
+#include "tokenizer.h"
 struct Tnode{  // token node for linked list of tokens                                                                                                                                   
 char * token;
 double prob;
@@ -26,7 +26,7 @@ struct Lnode * next_list;
 struct thread_arg{ // this argument stuct is passed to pthread_create so our routine has access to the right arguments 
 	pthread_mutex_t * lock;
 	char * path;
-  struct Lnode *head;
+  struct Lnode *list_head;
 }; 
 
 void * dir_handler(void * dir_info);
@@ -50,7 +50,7 @@ int main(int argc, char * argv[]){
 	
 	dir_obj->path = dir_handle; 
 	dir_obj->lock = &file_lock;
-	dir_obj->head = (struct Lnode *)malloc(sizeof(struct Lnode));
+	dir_obj->list_head = (struct Lnode *)malloc(sizeof(struct Lnode));
 	dir_handler((void *)dir_obj);
 	puts("whoops");	
 	printLL(dir_obj);
@@ -61,12 +61,12 @@ int main(int argc, char * argv[]){
 
 void printLL(struct thread_arg * arg){
  // puts("in printLL");
-	if( arg->head==NULL){ 
+	if( arg->list_head==NULL){ 
 		printf("not good\n");
 	}
-	while(arg->head!=NULL){
-    printf("current filename: %s\n", (arg->head)->file_handle);
-    arg->head = (arg->head)->next_list;
+	while(arg->list_head!=NULL){
+    printf("current filename: %s\n", (arg->list_head)->file_handle);
+    arg->list_head = (arg->list_head)->next_list;
   }
 }
 
@@ -92,7 +92,7 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
  newLnode->file_handle=arg->path;
  newLnode->token_list = NULL;
  newLnode->num_tokens = 0;
- struct Lnode *Head = arg->head;
+ struct Lnode *Head = arg->list_head;
  if(Head==NULL) { puts("yessss, head is null");}
 
  if(Head!=NULL){
@@ -133,6 +133,7 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
   addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
+  tokenize(string);
   pthread_mutex_unlock(arg->lock);
   
 	//  token_list_head=tokenize(string);
@@ -200,7 +201,7 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path; 
 				sub_dir_arg->lock = arg->lock;
-				sub_dir_arg->head = arg->head;
+				sub_dir_arg->list_head = arg->list_head;
 				pthread_create(&thread, &threadAttr, dir_handler, (void *)(sub_dir_arg) );	
 				
 				
@@ -236,7 +237,7 @@ void * dir_handler(void * dir_info){
 				struct thread_arg * sub_dir_arg = (struct thread_arg *)malloc(sizeof(struct thread_arg)); 
 				sub_dir_arg->path = concat_path2;
 				sub_dir_arg->lock = arg->lock;	
-				sub_dir_arg->head = arg->head;
+				sub_dir_arg->list_head = arg->list_head;
 				pthread_create(&thread2, &threadAttr, file_handler, (void *)(sub_dir_arg) );
 					
 			
