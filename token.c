@@ -58,7 +58,7 @@ return result;
       i = 0;
       int len = (strlen(string))-nonWords;
       char* word = malloc(sizeof(char)*(len+1));
-
+      word[len] = '\0';   
       while(string[i]!='\0'){
 	if(isalpha(string[i])){
           word[j] = string[i];
@@ -66,7 +66,7 @@ return result;
 	  }
 	  i++;
       }
-      word[len] = '\0';
+      //      word[len] = '\0';
 	return word;
    }
   
