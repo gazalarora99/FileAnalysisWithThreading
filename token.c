@@ -82,6 +82,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
   tokenList->next_token=NULL;
   tokenList->occur = 0;
   tokenList->prob = 0.0;
+  tokenList->tot=0;
   int i = 0, j = 0, hyphens = 0;
   char * substring;
      char * words;
@@ -103,6 +104,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
         newHyphen->next_token = NULL;
         newHyphen->occur = hyphens;
 	newHyphen->prob = 0.0;
+	newHyphen->tot = 0;
         addToTokens(newHyphen,tokenList);
      }
      
@@ -120,6 +122,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
 	newT->next_token = NULL;
 	newT->occur=1;
 	newT->prob=0.0;
+	newT->tot = 0;
 	//	printf("going to add %s\n", newT->token);
 	addToTokens(newT,tokenList);
 	//	puts("back from add, going next iter");
@@ -141,6 +144,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
         newTok->next_token = NULL;
 	newTok->occur=1;
         newTok->prob=0.0;
+	newTok->tot = 0;
 	//printf("going tto add %s\n", newTok->token);
         addToTokens(newTok,tokenList);
 	}
@@ -173,6 +177,7 @@ void addToTokens(struct Tnode* nw, struct Tnode* tokenList){
       tokenList->occur = nw->occur;
       tokenList->next_token = nw->next_token;
       tokenList->prob = nw->prob;
+      tokenList->tot = nw->tot;
 			//      total= total+head->occur;
       //  if(head==NULL) puts("head still null");
       //printf("first token %s\n", head->token);
@@ -224,6 +229,7 @@ while(curr!=NULL){
 	//        printf("curr token %s, occur %d\n", prev->token, prev->occur);
       }
  printf("total tokens %d\n", total);
+ tokenList->tot = total;
  probability(tokenList, total);
 }
 
@@ -236,7 +242,8 @@ void probability(struct Tnode* tokenList, int total){
   while(curr!=NULL){
   oc = (double) curr->occur;
   curr->prob = (oc/total);
-  printf("curr token %s, occur %d, prob %.3f\n", curr->token, curr->occur, curr->prob);
+  curr->tot = total;
+  printf("curr token %s, occur %d, prob %.3f, total tokens this list %d\n", curr->token, curr->occur, curr->prob, curr->tot);
   curr = curr->next_token;
   }
   puts("End of prob list for this file");

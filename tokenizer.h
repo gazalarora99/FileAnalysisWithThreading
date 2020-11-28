@@ -12,7 +12,8 @@
 struct Tnode{  // token node for linked list of tokens                                                                                                                                                                         
 char * token;
 double prob;
-  int occur;
+int occur;
+  int tot;
 struct Tnode * next_token;
 };
 
@@ -48,7 +49,8 @@ void print_thread_list(struct thread_node * list);
  
 int Delimiter_present(char c);                                                                                                                                                                                  
 char* createSubstring(char* string, int beginIndex, int endIndex);                                                                                                                                              
-char* isWord(char* string);                                                                                                                                                                                    void probability(struct Tnode* tokenList, int total); 
+char* isWord(char* string);
+void probability(struct Tnode* tokenList, int total); 
 void printLinkedList( struct Tnode* tokenList);                                                                                                                                                                  
 void addToTokens(struct Tnode* nw, struct Tnode* tokenList);                                                                                                                                                    
 struct Tnode* tokenize(char* string, struct Tnode* tokenList);   
