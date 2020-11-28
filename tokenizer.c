@@ -7,6 +7,7 @@
 #include <pc2.c>
 */
 #include "tokenizer.h"
+//#include "pc2.h"
 /*
 struct Token{
 char *token_string;
@@ -768,7 +769,7 @@ return head;
  *of a token, given a pointer to it
  *for null token, will return without printing
  */
-char* printToken(struct Token* token){
+char* printToken(struct Token* token, struct Tnode * tokenList){
 if(token==NULL){
 return NULL;
 }
@@ -783,7 +784,8 @@ if (strcmp((getTokenTypeFromEnum(token->token_type)) , "word")==0){
 //print any other token type	
 printf("%s: ", getTokenTypeFromEnum(token->token_type));
 printf("\"%s\"\n", token->token_string);
- return token->token_string;
+addToken(token->token_string, tokenList);
+return token->token_string;
 }
  return NULL;
 //printing token string
@@ -867,26 +869,60 @@ int Invalid_Token(char c, int substring_index, char* input){
 }
 
 
-void addToken(char* newStr, struct Tnode *Tlist){
-
-  struct Tnode *newTnode = (struct Tnode) malloc(sizeof(struct Tnode));
+void addToken(char* newStr, struct Tnode* Tlist){
+  for(int i = 0; i < strlen(newStr); i++){
+    newStr[i] = tolower(newStr[i]);
+  }
+  struct Tnode *newTnode = (struct Tnode*) malloc(sizeof(struct Tnode));
   newTnode->token = newStr;
   newTnode->occur = 1;
+  newTnode->prob = 0.0;
   newTnode->next_token = NULL;
-
-  struct Tnode *prev = NULL, curr = Tlist;
-
+  int k=0;
+  struct Tnode *prev = NULL;
+  struct Tnode * curr = Tlist;
+  if(Tlist==NULL){
+    Tlist=newTnode;
+    puts("first tnode added");
+    //    Tlist->next_token = NULL;
+    return;
+  }
   while(curr!=NULL){
+    if(k>1){
+    printf("prev token %s, curr token %s", prev->token, curr->token);
+    }
+    //token already exists
+    if(strcmp(curr->token, newTnode->token)==0){
+      curr->occur++;
+      return;
+    }
+
+    //if current string is smaller than new token, keep traversing
+    if(strcmp(curr->token, newTnode->token)<0){
+      k++;
     prev = curr;
     curr = curr->next_token;
+    }
+
+    //found insertion spot
+    if(strcmp(curr->token, newTnode->token) > 0){
+      prev->next_token = newTnode;
+      newTnode->next_token = curr;
+      return;
+    }
   }
+
+  //no spot found till the end where curr=null
+  //add to tail
+  prev->next_token = newTnode;
+  newTnode->next_token = NULL;
     
   
 }
 
 
 //int main(int argc, char** argv){
-void tokenize(char* string, struct Tnode *tokenList){
+void tokenize(char* string, struct Tnode* tokenList){
   /*if (argc!=2){
   puts("Invalid number of arguments");
   return 1;
@@ -990,8 +1026,8 @@ while(inputString[i]!='\0'){
   if(Invalid_Token(inputString[i], i,inputString)==0){
       if(head!=NULL){
         if(head->alreadyPrinted==0){
-        newToken = printToken(head);
-	addToken(newToken, tokenList);
+	  printToken(head, tokenList);
+	//	addToken(newToken, tokenList);
         head->alreadyPrinted=1;
       }
      }
@@ -1073,8 +1109,8 @@ free(possible_hex);
 
  if(head!=NULL){
  if(head->alreadyPrinted==0){
- newToken = printToken(head);
- addToken(newToken, tokenList);
+   printToken(head,tokenList);
+ //addToken(newToken, tokenList);
  head->alreadyPrinted=1;
  }
  }
@@ -1092,8 +1128,9 @@ i++;
 
  if(head!=NULL){
    if(head->alreadyPrinted==0){
-   newToken =  printToken(head);
-   addToken(newToken, tokenList);
+   
+     printToken(head,tokenList);
+   
    head->alreadyPrinted=1;
    }
  }

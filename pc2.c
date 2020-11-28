@@ -1,4 +1,4 @@
-#include<stdlib.h>
+/*#include<stdlib.h>
 #include<stdio.h>
 #include<pthread.h>
 #include<string.h>
@@ -7,7 +7,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <ctype.h>
+*/
 #include "tokenizer.h"
+
+//#include "pc2.h"
+/*
 struct Tnode{  // token node for linked list of tokens                                                                                                                                   
 char * token;
 double prob;
@@ -33,9 +37,9 @@ struct thread_arg{ // this argument stuct is passed to pthread_create so our rou
 void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
 char * input(struct thread_arg * arg, int fd);
-void addToList(struct thread_arg * arg, struct Lnode * H);
+void addToList(struct thread_arg * arg, struct Lnode * H,char* string);
 void printLL(struct thread_arg * arg);
-
+*/
 
 
 int main(int argc, char * argv[]){ 
@@ -89,9 +93,10 @@ char* input(struct thread_arg * arg, int fd){
   return buf;
 }
 
-void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
+void  addToList(struct thread_arg * arg, struct Lnode * newLnode, char* string){
  newLnode->file_handle=arg->path;
  newLnode->token_list = NULL;
+   //(struct Tnode *)malloc(sizeof(struct Tnode));
  newLnode->num_tokens = 0;
  struct Lnode *H = arg->list_head;
  if(H==NULL) { puts("yessss, head is null");}
@@ -107,6 +112,7 @@ void  addToList(struct thread_arg * arg, struct Lnode * newLnode){
      temp = temp->next_list;
    }
    prev->next_list = newLnode;
+   tokenize(string, newLnode->token_list);
    printf("previous item %s, current item %s\n",prev->file_handle, (prev->next_list)->file_handle);
    //   printf("adding to head of the non-empty list, filename: %s\n", (arg->list_head)->file_handle);                                                                                   
  }
@@ -131,10 +137,11 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
   char *string; 
   struct Tnode *token_list_head;
   pthread_mutex_lock(arg->lock);
-  addToList(arg, newLnode);
+  //  addToList(arg, newLnode);
   int fd = open(arg->path, O_RDONLY);
   string = input(arg, fd);
-  tokenize(string);
+  addToList(arg, newLnode, string);
+  //tokenize(string, (arg->list_head)->token_list);
   pthread_mutex_unlock(arg->lock);
   
 	//  token_list_head=tokenize(string);
