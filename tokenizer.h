@@ -48,7 +48,7 @@ void addToList(struct thread_arg * arg, struct Lnode * H,char* string);
 void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
 double probability_calc(char * token ,struct Tnode * L1, struct Tnode * L2);
-
+void kld(struct Lnode* list1, struct Lnode *list2 , struct Tnode* mean_list);
 void complete_output(struct thread_arg * input );
 void print_thread_list(struct thread_node * list);
 

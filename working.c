@@ -346,20 +346,63 @@ while(ptr->next_list!=NULL){
 				
 			} 
 			printf(" \n");
+		        kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
 	}
 
 	ptr = ptr->next_list;
 
-}
-
-
-
-
-
+ }
 
 }
 
+
+
+
+void kld(struct Lnode* list1, struct Lnode *list2 , struct Tnode* mean_list){
+
+
+struct Lnode * ptr = list1;
+struct Lnode * ptr2 = list2;
+
+struct Tnode * list_ptr = ptr->token_list;
+struct Tnode * list_ptr2 = ptr2->token_list;
+struct Tnode * mean_list_ptr = mean_list;
+ double k1 = 0.0;
+   double k2 = 0.0 ;
+ double x, m;
+          while(list_ptr!=NULL){
+            x = list_ptr->prob;
+            while(mean_list_ptr!=NULL){
+                if(strcmp(mean_list_ptr->token, list_ptr->token)==0){
+                  m = mean_list_ptr->prob;
+                  break;
+		}
+                mean_list_ptr = mean_list_ptr->next_token;
+	     }
+	    k1 += (x * (log( (x/m) )));
+	    list_ptr = list_ptr->next_token;
+	  }
+	 
+
+          mean_list_ptr = mean_list;
+
+          while(list_ptr2!=NULL){
+            x = list_ptr2->prob;
+            while(mean_list_ptr!=NULL){
+                if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
+                  m = mean_list_ptr->prob;
+                  break;
+		}
+                mean_list_ptr = mean_list_ptr->next_token;
+              }
+	    k2 += (x * (log( (x/m) )));
+	    list_ptr2 = list_ptr2->next_token;
+	   }
+            double jsd = (k1+k2)/2 ;
+	    
+            printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
+ }
 
 
 

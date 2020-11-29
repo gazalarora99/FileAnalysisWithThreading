@@ -555,7 +555,7 @@ struct Lnode * ptr2 = list2;
 struct Tnode * list_ptr = ptr->token_list;	
 struct Tnode * list_ptr2 = ptr2->token_list;
 struct Tnode * mean_list_ptr = mean_list;
- double k1 = 0.0
+ double k1 = 0.0;
    double k2 = 0.0 ;
  double x, m; 
 	  while(list_ptr!=NULL){
@@ -575,14 +575,17 @@ struct Tnode * mean_list_ptr = mean_list;
 	  while(list_ptr2!=NULL){
 	    x = list_ptr2->prob;
 	    while(mean_list_ptr!=NULL{
-	    if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
+		if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
                   m = mean_list_ptr->prob;
                   break;
 		}
                 mean_list_ptr =	mean_list_ptr->next_token;
-             }
-              k2 += (x * log( (x/m) ));
 	      }
+              k2 += (x * log( (x/m) ));
+	      
 	  }
+	    double jsd = (k1+k2)/2 ;
+	    printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
+ }
 	 
  
