@@ -1,3 +1,4 @@
+all: working
 working: working.o token.o
 	gcc -g -pthread working.o token.o -o detector -lm
 working.o: working.c

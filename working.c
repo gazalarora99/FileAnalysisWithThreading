@@ -130,13 +130,49 @@ int main(int argc, char * argv[]){
 	
 	complete_output(dir_obj);
         //printLL(dir_obj);
-
+	free_stuff(dir_obj);
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
+	//	free_stuff(dir_obj);
 	printf("wowza\n");
 	return 1;
 }
 
+void free_stuff(struct thread_arg * arg){
+
+  struct Lnode* list = arg->list_head;
+  //  struct Lnode* tempList;
+  //struct Tnode* tokens;
+  //struct Tnode* temp;
+  //  if(list==NULL) puts("empty list");
+  
+  while(list!=NULL){
+    if(list->file_handle != NULL) {
+    free(list->file_handle);
+    //    puts("file handle freed");
+    }
+    struct Tnode* tokens = list->token_list;
+    struct Lnode* tempList = list;
+  while(tokens!=NULL){
+    if(tokens->token !=NULL){
+      free(tokens->token);
+      //puts("token freed");
+    }
+    struct Tnode* temp = tokens;
+    tokens = tokens->next_token;
+    free(temp);
+    if (temp==NULL) puts("freed temp tokens");
+  }
+  list = list->next_list;
+  free(tempList);
+  if(tempList==NULL){
+    puts("freed ttemp list");
+  }
+  }
+  free(arg);
+  if(arg==NULL) puts("freed arg");
+  printf("arg %s\n", arg->path);
+}
 
 void printLL(struct thread_arg * arg){
  // puts("in printLL");
@@ -191,6 +227,9 @@ if(arg->list_head == NULL){
    H->token_list = tokenize(string, newLnode->token_list);
    H->next_list = newLnode->next_list;
    H->num_tokens = newLnode->num_tokens;
+   if(H->token_list!=NULL){
+     H->num_tokens = (H->token_list)->tot;
+   }
    //   printf("adding first node to file list, filename: %s\n", H->file_handle);
  }
  
@@ -212,8 +251,11 @@ if(arg->list_head == NULL){
 //	}
 	 ptr->next_list = newLnode;
 	 (ptr->next_list)->token_list =  tokenize(string, newLnode->token_list);
+	 if((ptr->next_list)->token_list!=NULL){
+	 (ptr->next_list)->num_tokens = ((ptr->next_list)->token_list)->tot;
 	 //	 printf("added current item %s\n",(ptr->next_list)->file_handle);
-	return;
+	 }
+	 return;
  }
 }
 
@@ -308,7 +350,7 @@ struct Lnode *newLnode = (struct Lnode*)malloc(sizeof(struct Lnode));
 
 //free(string);
 
-free(arg);
+//free(arg);
 
 pthread_exit(0);
 
@@ -658,7 +700,7 @@ void * dir_handler(void * dir_info){
 //	pthread_join(thread,NULL);
 //	pthread_join(thread2,NULL);
 	// pthread_attr_destroy(&threadAttr);
-	free(arg);
+	//	free(arg);
 //	print_thread_list(ThreadList);
 //	return NULL ;
 	pthread_exit(0);

@@ -40,6 +40,7 @@ struct thread_node{
 	struct thread_node * nextId;
 };
 
+void free_stuff(struct thread_arg * arg);
 void * dir_handler(void * dir_info);
 void * file_handler(void * file_info);
 struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double prob);
