@@ -1,0 +1,31 @@
+Testcase 1:
+A directory with multiple subdirectories with
+further levels of subdirectories to test threading of
+directory handler function for each subdirectory
+
+Testcase 2:
+A directory with only txt files and no subdirectories to ensure
+testing of file_handler function
+
+Testcase 3:
+A directory with both subdirectories and txt files at multiple sublevels
+to test simultaneous functioning of directory handler and file handler threads
+
+Testcase 4:
+If given argument is not a directory or the given directory does not exist, returns an Error message.
+
+Testcase 5:
+An empty directory, returns an Error message
+
+Testcase 6:
+A directory with relative path ../testDir helps test a wider range of directories and input validation
+
+Testcase 7:
+A directory ".." or "." to test skipping it and avoid infinite loop
+
+Testcase 8:
+A directory with a single file and nothing else to be compared to, returns an Error message
+
+Testcase 9:
+A directory which has a file with no tokens (empty file), returns a message for that particularr file's comparison
+

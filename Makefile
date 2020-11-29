@@ -1,8 +1,8 @@
-all: working
-working: working.o token.o
-	gcc -g -pthread working.o token.o -o detector -lm
-working.o: working.c
-	gcc -g -c -pthread working.c -lm
+all: Asst2
+Asst2: Asst2.o token.o
+	gcc -g -pthread Asst2.o token.o -o detector -lm
+Asst2.o: Asst2.c
+	gcc -g -c -pthread Asst2.c -lm
 token.o: token.c
 	gcc -g -c token.c -lm
 clean:

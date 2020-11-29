@@ -219,9 +219,10 @@ void printLinkedList(struct Tnode* tokenList){
  // tokenList = head;
   struct Tnode* prev = NULL;
       struct Tnode* curr = tokenList;
-  if(tokenList==NULL){
-    puts("empty list");
-  }
+      if(strcmp(tokenList->token, "")==0){
+	//puts("empty file");
+	return;
+      }
 while(curr!=NULL){
   total+=curr->occur;
         prev=curr;

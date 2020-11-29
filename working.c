@@ -127,14 +127,15 @@ int main(int argc, char * argv[]){
           pthread_attr_destroy(&threadAttr2);
 	  return 0;
 	}
-	
+
+	//	printLL(dir_obj);
 	complete_output(dir_obj);
-        //printLL(dir_obj);
-	free_stuff(dir_obj);
+	printLL(dir_obj);
+       	free_stuff(dir_obj);
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
 	//	free_stuff(dir_obj);
-	printf("wowza\n");
+	//	printf("wowza\n");
 	return 1;
 }
 
@@ -147,43 +148,46 @@ void free_stuff(struct thread_arg * arg){
   //  if(list==NULL) puts("empty list");
   
   while(list!=NULL){
-    if(list->file_handle != NULL) {
+    if(strcmp(list->file_handle, "") != 0) {
     free(list->file_handle);
     //    puts("file handle freed");
     }
     struct Tnode* tokens = list->token_list;
     struct Lnode* tempList = list;
   while(tokens!=NULL){
-    if(tokens->token !=NULL){
+    if(strcmp(tokens->token, "") != 0){
       free(tokens->token);
       //puts("token freed");
     }
     struct Tnode* temp = tokens;
     tokens = tokens->next_token;
     free(temp);
-    if (temp==NULL) puts("freed temp tokens");
+    //if (temp==NULL) puts("freed temp tokens");
   }
   list = list->next_list;
   free(tempList);
   if(tempList==NULL){
-    puts("freed ttemp list");
+    //puts("freed ttemp list");
   }
   }
   free(arg);
-  if(arg==NULL) puts("freed arg");
-  printf("arg %s\n", arg->path);
+  //if(arg==NULL) puts("freed arg");
+  //  printf("arg %s\n", arg->path);
 }
 
 void printLL(struct thread_arg * arg){
  // puts("in printLL");
+  int files = 0;
 	struct thread_arg * ptr = arg;
 	if( ptr->list_head==NULL){ 
 		printf("not good\n");
 	}
+	printf("\nPrinting filenames\n");
 	while(ptr->list_head!=NULL){
-    printf("current filename: %s\n", (ptr->list_head)->file_handle);
-    ptr->list_head = (ptr->list_head)->next_list;
-  }
+	  files++;
+	  printf("File number %d: %s, num tokens %d\n", files, (ptr->list_head)->file_handle, (ptr->list_head)->num_tokens);
+          ptr->list_head = (ptr->list_head)->next_list;
+	}
 }
 
 char* input(struct thread_arg * arg, int fd){
@@ -214,9 +218,9 @@ if(arg->list_head == NULL){
  	return;
  }
  newLnode->file_handle=arg->path;
- newLnode->token_list = NULL;
+ newLnode->token_list = tokenize(string, newLnode->token_list);
  newLnode->next_list = NULL;
- newLnode->num_tokens = 0;
+ newLnode->num_tokens = (newLnode->token_list)->tot;
  struct Lnode *H= arg->list_head;
  
  // if(H==NULL) { puts("yessss, head is null");}
@@ -224,12 +228,12 @@ if(arg->list_head == NULL){
 
  if(strcmp(H->file_handle, "")==0){
    H->file_handle = newLnode->file_handle;
-   H->token_list = tokenize(string, newLnode->token_list);
+   H->token_list = newLnode->token_list;
    H->next_list = newLnode->next_list;
    H->num_tokens = newLnode->num_tokens;
-   if(H->token_list!=NULL){
-     H->num_tokens = (H->token_list)->tot;
-   }
+   //if(H->token_list!=NULL){
+     //H->num_tokens = (H->token_list)->tot;
+     // }
    //   printf("adding first node to file list, filename: %s\n", H->file_handle);
  }
  
@@ -238,26 +242,56 @@ if(arg->list_head == NULL){
    //printf("temp node %s\n", temp->file_handle);
    //Head = newLnode;
    //printf("list head %s\n", Head->file_handle);
-   // struct Lnode *prev = NULL;
+   struct Lnode *prev = H;
+   struct Lnode *temp;
+   //head of list
+   if(newLnode->num_tokens < H->num_tokens){     
+     temp = malloc(sizeof(struct Lnode));
+     temp->file_handle = H->file_handle;
+     temp->token_list = H->token_list;
+     temp->next_list = H->next_list;
+     temp->num_tokens = H->num_tokens;
    
-	 
-	 while(ptr->next_list!=NULL){
-         ptr = ptr->next_list;
+     H->file_handle = newLnode->file_handle;
+     H->token_list = newLnode->token_list;
+     H->next_list = temp;
+     H->num_tokens = newLnode->num_tokens;
+     return;
+   }
+
+   while(ptr!=NULL){
+     //middle of list
+      if(newLnode->num_tokens < ptr->num_tokens){
+	prev->next_list = newLnode;
+	newLnode->next_list = ptr;
+	return;
+      }
+      prev = ptr;
+      ptr=ptr->next_list;
+   }
+   //end of list
+   prev->next_list = newLnode;
+   newLnode->next_list  = NULL;
+ }
+}
+    /*
+	 while(ptr->next_list!=NULL){	   
+	   ptr = ptr->next_list;
 	 }
+    */
   	//	printf("is it true %ld",ptr->next_list);
 
 //	if(ptr == NULL){ 
 //		printf(" \t \t WOEAODASDFASF \n");
 //	}
+    /*
 	 ptr->next_list = newLnode;
 	 (ptr->next_list)->token_list =  tokenize(string, newLnode->token_list);
 	 if((ptr->next_list)->token_list!=NULL){
 	 (ptr->next_list)->num_tokens = ((ptr->next_list)->token_list)->tot;
-	 //	 printf("added current item %s\n",(ptr->next_list)->file_handle);
-	 }
-	 return;
- }
-}
+    */	 //	 printf("added current item %s\n",(ptr->next_list)->file_handle);
+   
+
 
 
 double probability_calc( char * token ,struct Tnode * L1, struct Tnode * L2){ 
@@ -360,11 +394,18 @@ pthread_exit(0);
 
 void complete_output(struct thread_arg * input){ 
 
-
+  printf("\nJensen-Shannon Distance for each pair of file in given directory:\n");
 struct Lnode * ptr = input->list_head;
 struct Lnode * ptr2 = NULL;
 while(ptr->next_list!=NULL){ 
 	ptr2 = ptr->next_list;
+	if(strcmp((ptr->token_list)->token, "")==0)
+                          {
+                            printf("No tokens in \"%s\" to compare with any other file\n", ptr->file_handle);
+			    ptr = ptr->next_list;
+			    continue;
+                          }
+
 	
 	while(ptr2!=NULL){ 
 			
@@ -372,6 +413,17 @@ while(ptr->next_list!=NULL){
 			struct Tnode * list_ptr2 = ptr2->token_list;
 			
 			struct Tnode * mean_list =  NULL;
+			/*if(strcmp(list_ptr->token, "")==0)
+			  {
+			    printf("No tokens in \"%s\" to compare with any other file\"\n", ptr->file_handle);
+			    break;
+			    }*/
+			if(strcmp(list_ptr2->token, "")==0)
+                          {
+			   printf("Can't compare tokens in \"%s\" with ZERO tokens in empty file\"%s\"\n", ptr->file_handle, ptr2->file_handle);
+			   ptr2 = ptr2->next_list;			  
+                           continue;
+                          }
 			mean_list = ordered_insert(mean_list ,list_ptr->token, list_ptr->prob);
 			
 			while(list_ptr!=NULL){ 
