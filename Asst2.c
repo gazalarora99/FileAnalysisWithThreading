@@ -13,7 +13,7 @@
 #include "tokenizer.h"
 
 /*
-struct Tnode{  // token node for linked list of tokens                                                                                                                                                                                        
+struct Tnode{  // token node for linked list of tokens   
 char * token;
 double prob;
   int occur;
@@ -21,7 +21,7 @@ double prob;
 };
 
 
-struct Lnode{ // list nodes for list of linked list                                                                                                                                                                                           
+struct Lnode{ // list nodes for list of linked list   
 char * file_handle;
 int num_tokens;
 struct Tnode * token_list;
@@ -245,7 +245,7 @@ if(arg->list_head == NULL){
    struct Lnode *prev = H;
    struct Lnode *temp;
    //head of list
-   if(newLnode->num_tokens < H->num_tokens){     
+   if(newLnode->num_tokens > H->num_tokens){     
      temp = malloc(sizeof(struct Lnode));
      temp->file_handle = H->file_handle;
      temp->token_list = H->token_list;
@@ -261,7 +261,7 @@ if(arg->list_head == NULL){
 
    while(ptr!=NULL){
      //middle of list
-      if(newLnode->num_tokens < ptr->num_tokens){
+      if(newLnode->num_tokens > ptr->num_tokens){
 	prev->next_list = newLnode;
 	newLnode->next_list = ptr;
 	return;
@@ -428,13 +428,13 @@ while(ptr->next_list!=NULL){
 			
 			while(list_ptr!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
-				//				printf("list 1 toks %s \n",list_ptr->token);
+//								printf("list 1 toks %s \n",list_ptr->token);
 				list_ptr = list_ptr->next_token;
 			}
 			
 			while(list_ptr2!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
-				//	printf("list 2 toks %s \n",list_ptr2->token);
+	//				printf("list 2 toks %s \n",list_ptr2->token);
 				list_ptr2 = list_ptr2->next_token;
 			}
 			
@@ -446,7 +446,7 @@ while(ptr->next_list!=NULL){
 								
 				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
 				
-				//printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
+		//		printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
 				mean_list_ptr = mean_list_ptr->next_token;
 				
 			} 
@@ -474,17 +474,18 @@ struct Tnode * list_ptr = ptr->token_list;
 struct Tnode * list_ptr2 = ptr2->token_list;
 struct Tnode * mean_list_ptr = mean_list;
  double k1 = 0.0;
-   double k2 = 0.0 ;
-   double jsd, x, m, log1, log2;
-          while(list_ptr!=NULL){
-            x = list_ptr->prob;
-            while(mean_list_ptr!=NULL){
-                if(strcmp(mean_list_ptr->token, list_ptr->token)==0){
-                  m = mean_list_ptr->prob;
-                  break;
-		}
-                mean_list_ptr = mean_list_ptr->next_token;
-	     }
+ double k2 = 0.0 ;
+ double jsd, x, m, log1, log2;
+    while(list_ptr!=NULL){
+        x = list_ptr->prob;
+        mean_list_ptr = mean_list; // resets mean_list ptr to head of mean list after iteration
+				while(mean_list_ptr!=NULL){
+            if(strcmp(mean_list_ptr->token, list_ptr->token)==0){
+                 m = mean_list_ptr->prob;
+                 break;
+							}
+              mean_list_ptr = mean_list_ptr->next_token;
+	     	}
 	    log1 = log((x/m));
 	    k1 = k1 + (x * log1);
 	    list_ptr = list_ptr->next_token;
@@ -495,7 +496,8 @@ struct Tnode * mean_list_ptr = mean_list;
 
           while(list_ptr2!=NULL){
             x = list_ptr2->prob;
-            while(mean_list_ptr!=NULL){
+             mean_list_ptr = mean_list;
+						while(mean_list_ptr!=NULL){
                 if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
                   m = mean_list_ptr->prob;
                   break;
