@@ -392,10 +392,10 @@ pthread_exit(0);
 
 
 void printMeanList(struct Tnode* mean){
-
-  while(mean!=NULL){
-    printf("token name: %s, mean prob %lf\n", mean->token, mean->prob);
-    mean = mean->next_token;
+	struct Tnode * ptr  = mean;
+  while(ptr!=NULL){
+    printf("token name: %s, mean prob %lf\n", ptr->token, ptr->prob);
+    ptr = ptr->next_token;
   }
   
 }
@@ -436,13 +436,13 @@ while(ptr->next_list!=NULL){
 			
 			while(list_ptr!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
-//								printf("list 1 toks %s \n",list_ptr->token);
+								printf("list 1 toks %s \n",list_ptr->token);
 				list_ptr = list_ptr->next_token;
 			}
 			
 			while(list_ptr2!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
-	//				printf("list 2 toks %s \n",list_ptr2->token);
+					printf("list 2 toks %s \n",list_ptr2->token);
 				list_ptr2 = list_ptr2->next_token;
 			}
 			
