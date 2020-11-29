@@ -150,7 +150,7 @@ struct Tnode* tokenize(char* string, struct Tnode* tokenList){
 	}
     
     free(substring);
-    printf("printing tokens\n");
+    //  printf("printing tokens\n");
     printLinkedList(tokenList);
     return tokenList;
 }
@@ -228,7 +228,7 @@ while(curr!=NULL){
         curr = curr->next_token;
 	//        printf("curr token %s, occur %d\n", prev->token, prev->occur);
       }
- printf("total tokens %d\n", total);
+// printf("total tokens %d\n", total);
  tokenList->tot = total;
  probability(tokenList, total);
 }
@@ -243,10 +243,10 @@ void probability(struct Tnode* tokenList, int total){
   oc = (double) curr->occur;
   curr->prob = (oc/total);
   curr->tot = total;
-  printf("curr token %s, occur %d, prob %.3f, total tokens this list %d\n", curr->token, curr->occur, curr->prob, curr->tot);
+  //  printf("curr token %s, occur %d, prob %.3f, total tokens this list %d\n", curr->token, curr->occur, curr->prob, curr->tot);
   curr = curr->next_token;
   }
-  puts("End of prob list for this file");
+  //  puts("End of prob list for this file");
 }
 /*
   int main(){

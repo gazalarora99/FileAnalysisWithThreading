@@ -112,15 +112,24 @@ int main(int argc, char * argv[]){
 //	dir_handler((void *)dir_obj);
 
 	if(strcmp((dir_obj->list_head)->file_handle,"")==0){
-	  printf("nothing added to shared structure\n");
+	  printf("Empty directory, nothing added to shared structure\n");
+	  pthread_mutex_destroy(&file_lock);
+          pthread_attr_destroy(&threadAttr2);
 	  return 0;
 	}
 	//sort data structure based on number of tokens, emit an error & stop if a single file is there
 	//call to make mean token list
 	//use mean list and each file's token list to compute each file's KLD
+
+	if((dir_obj->list_head)->next_list==NULL){
+	  printf("Single file in directory, can't compute Jensen Shannon distance\n");
+	  pthread_mutex_destroy(&file_lock);
+          pthread_attr_destroy(&threadAttr2);
+	  return 0;
+	}
 	
 	complete_output(dir_obj);
-        printLL(dir_obj);
+        //printLL(dir_obj);
 
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
@@ -143,7 +152,7 @@ void printLL(struct thread_arg * arg){
 
 char* input(struct thread_arg * arg, int fd){
   if (fd>=0) {
-    printf("\nfile %s opened\n", arg->path);
+    //printf("\nfile %s opened\n", arg->path);
   }
   off_t off = lseek(fd, 0, SEEK_END);
   //printf("size of file %llu\n", (long long int) off);
@@ -156,7 +165,7 @@ char* input(struct thread_arg * arg, int fd){
   buf[size] = '\0';
   while((bytes=read(fd,buf,size)) > 0){
     //printf("read %d bytes\n", bytes);
-    printf("File's data\n%s", buf);
+    //printf("File's data\n%s", buf);
   }
   //  buf[size] = '\0';
   return buf;
@@ -325,13 +334,13 @@ while(ptr->next_list!=NULL){
 			
 			while(list_ptr!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
-				printf("list 1 toks %s \n",list_ptr->token);
+				//				printf("list 1 toks %s \n",list_ptr->token);
 				list_ptr = list_ptr->next_token;
 			}
 			
 			while(list_ptr2!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
-				printf("list 2 toks %s \n",list_ptr2->token);
+				//	printf("list 2 toks %s \n",list_ptr2->token);
 				list_ptr2 = list_ptr2->next_token;
 			}
 			
@@ -343,11 +352,11 @@ while(ptr->next_list!=NULL){
 								
 				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
 				
-				printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
+				//printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
 				mean_list_ptr = mean_list_ptr->next_token;
 				
 			} 
-			printf(" \n");
+			//		printf(" \n");
 		        kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
 	}
@@ -405,8 +414,34 @@ struct Tnode * mean_list_ptr = mean_list;
 	  }
 	  jsd = ((k1+k2))/2 ;
 	    
-            printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
- }
+	  // printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
+	    if(jsd>=0.0 && jsd<=0.1){
+	      printf("\033[0;31m"); //red
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	    }
+	    else if(jsd>0.1 && jsd<=0.15){
+	      printf("\033[0;33m");//yellow
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	     }
+	    else if(jsd>0.15 && jsd<=0.2){
+	      printf("\033[0;32m");//green
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      }
+	    else if(jsd>0.2 && jsd<=0.25){
+	      printf("\033[0;36m");//cyan
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	     }
+	    else if(jsd>0.25 && jsd<=0.3){
+	      printf("\033[0;34m");//blue
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      }
+	    else if(jsd>0.3){
+	      printf("\033[0m"); //default
+	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      }
+	    printf("\033[0m");
+
+}
 
 
 
@@ -492,10 +527,10 @@ struct thread_node * ptr = list;
 	int i =0;
 	while(ptr!=NULL){ 
 		i++;
-		printf("thread Id %ld \n",*(ptr->id));
+		//		printf("thread Id %ld \n",*(ptr->id));
 		ptr = ptr->nextId;
 	}
- 	printf("thread count %d\n",i);
+	// 	printf("thread count %d\n",i);
 } 
 
 
