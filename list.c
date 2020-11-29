@@ -500,3 +500,89 @@ void * dir_handler(void * dir_info){
 }
 
 
+void complete_output(struct thread_arg * input){ 
+
+
+struct Lnode * ptr = input->list_head;
+struct Lnode * ptr2 = NULL;
+while(ptr->next_list!=NULL){ 
+	ptr2 = ptr->next_list;
+	
+	while(ptr2!=NULL){ 
+			
+			struct Tnode * list_ptr = ptr->token_list;	
+			struct Tnode * list_ptr2 = ptr2->token_list;
+			
+			struct Tnode * mean_list =  NULL;
+			mean_list = ordered_insert(mean_list ,list_ptr->token, list_ptr->prob);
+			
+			while(list_ptr!=NULL){ 
+				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
+				list_ptr = list_ptr->next_token;
+			}
+			
+			while(list_ptr2!=NULL){ 
+				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
+				list_ptr2 = list_ptr2->next_token;
+			}
+			
+			list_ptr = ptr->token_list; 
+			list_ptr2 = ptr2->token_list;
+			struct Tnode * mean_list_ptr = mean_list; 
+				
+			while(mean_list_ptr!=NULL){ 
+								
+				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
+				
+				printf(" %lf \n", mean_list_ptr->prob);
+				mean_list_ptr = mean_list_ptr->next_token;
+				
+			} 
+			printf(" \n");
+		ptr2 = ptr2->next_list;
+	}
+
+	ptr = ptr->next_list;
+
+}
+
+ void kld(struct Lnode* list1, struct Lnode *list2 , struct Tnode* mean_list){
+
+   
+struct Lnode * ptr = list1;
+struct Lnode * ptr2 = list2;
+
+struct Tnode * list_ptr = ptr->token_list;	
+struct Tnode * list_ptr2 = ptr2->token_list;
+struct Tnode * mean_list_ptr = mean_list;
+ double k1 = 0.0
+   double k2 = 0.0 ;
+ double x, m; 
+	  while(list_ptr!=NULL){
+	    x = list_ptr->prob;
+	    while(mean_list_ptr!=NULL{
+		if(strcmp(mean_list_ptr->token, list_ptr->token)==0){
+		  m = mean_list_ptr->prob;
+		  break;
+		}
+		mean_list_ptr = mean_list_ptr->next_token;
+	     }
+	      k1 += (x * log( (x/m) ));
+	  }
+	    
+	  mean_list_ptr = mean_list;
+
+	  while(list_ptr2!=NULL){
+	    x = list_ptr2->prob;
+	    while(mean_list_ptr!=NULL{
+	    if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
+                  m = mean_list_ptr->prob;
+                  break;
+		}
+                mean_list_ptr =	mean_list_ptr->next_token;
+             }
+              k2 += (x * log( (x/m) ));
+	      }
+	  }
+	 
+ 
