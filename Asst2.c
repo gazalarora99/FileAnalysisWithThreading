@@ -245,7 +245,7 @@ if(arg->list_head == NULL){
    struct Lnode *prev = H;
    struct Lnode *temp;
    //head of list
-   if(newLnode->num_tokens > H->num_tokens){     
+   if(newLnode->num_tokens < H->num_tokens){     
      temp = malloc(sizeof(struct Lnode));
      temp->file_handle = H->file_handle;
      temp->token_list = H->token_list;
@@ -261,7 +261,7 @@ if(arg->list_head == NULL){
 
    while(ptr!=NULL){
      //middle of list
-      if(newLnode->num_tokens > ptr->num_tokens){
+      if(newLnode->num_tokens < ptr->num_tokens){
 	prev->next_list = newLnode;
 	newLnode->next_list = ptr;
 	return;
@@ -391,6 +391,14 @@ pthread_exit(0);
 }
 
 
+void printMeanList(struct Tnode* mean){
+
+  while(mean!=NULL){
+    printf("token name: %s, mean prob %lf\n", mean->token, mean->prob);
+    mean = mean->next_token;
+  }
+  
+}
 
 void complete_output(struct thread_arg * input){ 
 
@@ -420,7 +428,7 @@ while(ptr->next_list!=NULL){
 			    }*/
 			if(strcmp(list_ptr2->token, "")==0)
                           {
-			   printf("Can't compare tokens in \"%s\" with ZERO tokens in empty file\"%s\"\n", ptr->file_handle, ptr2->file_handle);
+			   printf("Can't compare tokens in \"%s\" with ZERO tokens in empty file \"%s\"\n", ptr->file_handle, ptr2->file_handle);
 			   ptr2 = ptr2->next_list;			  
                            continue;
                           }
@@ -451,7 +459,8 @@ while(ptr->next_list!=NULL){
 				
 			} 
 			//		printf(" \n");
-		        kld(ptr, ptr2, mean_list);
+			printMeanList(mean_list);
+		kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
 	}
 
@@ -479,17 +488,17 @@ struct Tnode * mean_list_ptr = mean_list;
     while(list_ptr!=NULL){
         x = list_ptr->prob;
         mean_list_ptr = mean_list; // resets mean_list ptr to head of mean list after iteration
-				while(mean_list_ptr!=NULL){
+	while(mean_list_ptr!=NULL){
             if(strcmp(mean_list_ptr->token, list_ptr->token)==0){
                  m = mean_list_ptr->prob;
                  break;
-							}
-              mean_list_ptr = mean_list_ptr->next_token;
-	     	}
+	     }
+             mean_list_ptr = mean_list_ptr->next_token;
+	}
 	    log1 = log((x/m));
 	    k1 = k1 + (x * log1);
 	    list_ptr = list_ptr->next_token;
-	  }
+   }
 	 
 
           mean_list_ptr = mean_list;
@@ -497,13 +506,13 @@ struct Tnode * mean_list_ptr = mean_list;
           while(list_ptr2!=NULL){
             x = list_ptr2->prob;
              mean_list_ptr = mean_list;
-						while(mean_list_ptr!=NULL){
+	       while(mean_list_ptr!=NULL){
                 if(strcmp(mean_list_ptr->token, list_ptr2->token)==0){
                   m = mean_list_ptr->prob;
                   break;
 		}
                 mean_list_ptr = mean_list_ptr->next_token;
-              }
+               }
 	    log2 = log((x/m));
 	    k2 = k2 + (x * log2);
 	    list_ptr2 = list_ptr2->next_token;

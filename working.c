@@ -420,7 +420,7 @@ while(ptr->next_list!=NULL){
 			    }*/
 			if(strcmp(list_ptr2->token, "")==0)
                           {
-			   printf("Can't compare tokens in \"%s\" with ZERO tokens in empty file\"%s\"\n", ptr->file_handle, ptr2->file_handle);
+			   printf("Can't compare tokens in \"%s\" with ZERO tokens in empty file \"%s\"\n", ptr->file_handle, ptr2->file_handle);
 			   ptr2 = ptr2->next_list;			  
                            continue;
                           }
