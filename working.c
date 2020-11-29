@@ -55,19 +55,28 @@ void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
 void print_Id_list(struct thread_node * list);
 */
-double probability_calc(char * token ,struct Tnode * L1, struct Tnode * L2); 
+//double probability_calc(char * token ,struct Tnode * L1, struct Tnode * L2); 
 
-void complete_output(struct thread_arg * input ); 
+//void complete_output(struct thread_arg * input ); 
 
 
 struct thread_node * ThreadList = NULL;  
 
 int main(int argc, char * argv[]){ 
 
-
+  
+  if(argc!=2){
+    printf("Error: Invalid number of arguments\n");
+  }
 	char * dir_handle  = argv[1]; 
 
-
+	struct stat stats;
+	stat(dir_handle,&stats);
+	if(!(S_ISDIR(stats.st_mode))){
+	  printf("Error: Given path is not a directory\n");
+	  return 0;
+	}
+	
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
 	pthread_mutex_t file_lock; // for file sync to work we need to make sure the lock is initialized outside of function 
@@ -101,7 +110,16 @@ int main(int argc, char * argv[]){
 		ptr = ptr->nextId;
 	} 
 //	dir_handler((void *)dir_obj);
-				complete_output(dir_obj);
+
+	if(strcmp((dir_obj->list_head)->file_handle,"")==0){
+	  printf("nothing added to shared structure\n");
+	  return 0;
+	}
+	//sort data structure based on number of tokens, emit an error & stop if a single file is there
+	//call to make mean token list
+	//use mean list and each file's token list to compute each file's KLD
+	
+	complete_output(dir_obj);
         printLL(dir_obj);
 
 	pthread_mutex_destroy(&file_lock); 	
@@ -453,8 +471,8 @@ void * dir_handler(void * dir_info){
 	
 	while(file != NULL){
 		
-		if(file->d_name[0]!='.'){
-			if(file->d_type == DT_DIR){ // checks if current object is a directory
+	  if(strcmp(file->d_name, ".")!=0 && strcmp(file->d_name, "..")!=0){
+	      	if(file->d_type == DT_DIR){ // checks if current object is a directory
 				
 				int arg_p = strlen(arg->path); 
 				int argFile_d = strlen(file->d_name);

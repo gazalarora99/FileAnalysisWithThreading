@@ -8,7 +8,7 @@
 #include <fcntl.h>
 #include <ctype.h>
 #include <math.h>
-
+#include <sys/stat.h>
 
 //#include "tokenizer.h"
 
@@ -47,6 +47,9 @@ char * input(struct thread_arg * arg, int fd);
 void addToList(struct thread_arg * arg, struct Lnode * H,char* string);
 void printLL(struct thread_arg * arg);
 struct thread_node * idIns(pthread_t * id, struct thread_node * list);
+double probability_calc(char * token ,struct Tnode * L1, struct Tnode * L2);
+
+void complete_output(struct thread_arg * input );
 void print_thread_list(struct thread_node * list);
 
  
