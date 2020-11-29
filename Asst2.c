@@ -334,27 +334,34 @@ struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double 
 			shared_struct->token = token; 
 			shared_struct->prob = prob; 
 			shared_struct->next_token = NULL;
+			printf("first token in %s \n",token);
 			return shared_struct;
 	}
 
 	struct Tnode * ptr = shared_struct; 
 
-	if(strcmp(ptr->token,token)==0){ 
-				return ptr;
-	}
+			if(strcmp(ptr->token,token)==0){ 
+						return shared_struct;
+			}
 	
+
 	while(ptr->next_token != NULL){ 
 				if(strcmp(ptr->token,token)==0){ 
 						return shared_struct;
 				}	
 				ptr = ptr->next_token;
-	}
+	} 
+		
+	if(strcmp(ptr->token,token)==0){ 
+						return shared_struct;
+			}
 	
 	struct Tnode * new_node = (struct Tnode *)malloc(sizeof(struct Tnode));
 	new_node->token = token; 
 	new_node->next_token = NULL;
 	ptr->next_token = new_node;
-	ptr->prob = prob; 
+	//ptr->prob = prob; 
+	new_node->prob = prob;
 	return shared_struct;
 }
 
@@ -454,12 +461,12 @@ while(ptr->next_list!=NULL){
 								
 				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
 				
-		//		printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
+				printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
 				mean_list_ptr = mean_list_ptr->next_token;
 				
 			} 
-			//		printf(" \n");
-			printMeanList(mean_list);
+					printf(" \n");
+			//printMeanList(mean_list);
 		kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
 	}
