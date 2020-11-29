@@ -260,7 +260,7 @@ struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double 
 	
 	while(ptr->next_token != NULL){ 
 				if(strcmp(ptr->token,token)==0){ 
-						return ptr;
+						return shared_struct;
 				}	
 				ptr = ptr->next_token;
 	}
@@ -325,11 +325,13 @@ while(ptr->next_list!=NULL){
 			
 			while(list_ptr!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
+				printf("list 1 toks %s \n",list_ptr->token);
 				list_ptr = list_ptr->next_token;
 			}
 			
 			while(list_ptr2!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
+				printf("list 2 toks %s \n",list_ptr2->token);
 				list_ptr2 = list_ptr2->next_token;
 			}
 			
