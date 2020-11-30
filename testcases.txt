@@ -27,5 +27,5 @@ Testcase 8:
 A directory with a single file and nothing else to be compared to, returns an Error message
 
 Testcase 9:
-A directory which has a file with no tokens (empty file), returns a message for that particularr file's comparison
+A directory which has a file with no tokens (empty file), returns a message for that particular file's comparison
 

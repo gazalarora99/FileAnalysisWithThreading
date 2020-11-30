@@ -1,3 +1,7 @@
+/* @authors 
+Gazal Arora and Charles Rodriguez */
+
+
 /*
 #include<stdlib.h>
 #include<stdio.h>
@@ -67,6 +71,7 @@ int main(int argc, char * argv[]){
   
   if(argc!=2){
     printf("Error: Invalid number of arguments\n");
+    return 0;
   }
 	char * dir_handle  = argv[1]; 
 
@@ -76,7 +81,10 @@ int main(int argc, char * argv[]){
 	  printf("Error: Given path is not a directory\n");
 	  return 0;
 	}
-	
+	if(strcmp(dir_handle, ".")==0 || strcmp(dir_handle, "..")==0 || strcmp(dir_handle, "./")==0 || strcmp(dir_handle, "../")==0){
+	    printf("Error: Can't run current or parent directory, please use relative path or absolute path for another dirrectory\n");
+	    return 0;
+	  }
 
 	struct thread_arg * dir_obj = (struct thread_arg *)malloc(sizeof(struct thread_arg));  
 	pthread_mutex_t file_lock; // for file sync to work we need to make sure the lock is initialized outside of function 
@@ -130,7 +138,7 @@ int main(int argc, char * argv[]){
 
 	//	printLL(dir_obj);
 	complete_output(dir_obj);
-	printLL(dir_obj);
+	//	printLL(dir_obj);
        	free_stuff(dir_obj);
 	pthread_mutex_destroy(&file_lock); 	
 	pthread_attr_destroy(&threadAttr2); 
@@ -408,7 +416,7 @@ void printMeanList(struct Tnode* mean){
 
 void complete_output(struct thread_arg * input){ 
 
-  printf("\nJensen-Shannon Distance for each pair of file in given directory:\n");
+  printf("\nJensen-Shannon Distance for each pair of file in given directory:\n\n");
 struct Lnode * ptr = input->list_head;
 struct Lnode * ptr2 = NULL;
 while(ptr->next_list!=NULL){ 
@@ -467,12 +475,19 @@ while(ptr->next_list!=NULL){
 			//printMeanList(mean_list);
 		kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
+		//freeing the mean_list for this pair of files                                                                                                                                   
+		struct Tnode* temp;
+		while(mean_list!=NULL){
+		  temp = mean_list;
+		  mean_list = mean_list->next_token;
+		  free(temp);
+		  //printf("freed\n");
+		}
 	}
-
 	ptr = ptr->next_list;
-
+ 
  }
-
+ printf("\n");
 }
 
 
@@ -530,27 +545,27 @@ struct Tnode * mean_list_ptr = mean_list;
 	  // printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
 	    if(jsd>=0.0 && jsd<=0.1){
 	      printf("\033[0;31m"); //red
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	    }
 	    else if(jsd>0.1 && jsd<=0.15){
 	      printf("\033[0;33m");//yellow
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	     }
 	    else if(jsd>0.15 && jsd<=0.2){
 	      printf("\033[0;32m");//green
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	      }
 	    else if(jsd>0.2 && jsd<=0.25){
 	      printf("\033[0;36m");//cyan
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	     }
 	    else if(jsd>0.25 && jsd<=0.3){
 	      printf("\033[0;34m");//blue
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	      }
 	    else if(jsd>0.3){
 	      printf("\033[0m"); //default
-	      printf("%.3f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
+	      printf("%.6f \"%s\" and \"%s\"\n", jsd, list1->file_handle, list2->file_handle);
 	      }
 	    printf("\033[0m");
 

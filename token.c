@@ -242,7 +242,7 @@ void probability(struct Tnode* tokenList, int total){
   struct Tnode* curr = tokenList;
   while(curr!=NULL){
   oc = (double) curr->occur;
-  curr->prob = (oc/total);
+  curr->prob = ( (double) oc/total);
   curr->tot = total;
   //  printf("curr token %s, occur %d, prob %.3f, total tokens this list %d\n", curr->token, curr->occur, curr->prob, curr->tot);
   curr = curr->next_token;
