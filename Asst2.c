@@ -334,7 +334,6 @@ struct Tnode * ordered_insert(struct Tnode * shared_struct,char * token, double 
 			shared_struct->token = token; 
 			shared_struct->prob = prob; 
 			shared_struct->next_token = NULL;
-			printf("first token in %s \n",token);
 			return shared_struct;
 	}
 
@@ -443,13 +442,13 @@ while(ptr->next_list!=NULL){
 			
 			while(list_ptr!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr->token,list_ptr->prob);
-								printf("list 1 toks %s \n",list_ptr->token);
+		//						printf("list 1 toks %s \n",list_ptr->token);
 				list_ptr = list_ptr->next_token;
 			}
 			
 			while(list_ptr2!=NULL){ 
 				mean_list = ordered_insert(mean_list,list_ptr2->token,list_ptr2->prob);
-					printf("list 2 toks %s \n",list_ptr2->token);
+			//		printf("list 2 toks %s \n",list_ptr2->token);
 				list_ptr2 = list_ptr2->next_token;
 			}
 			
@@ -461,11 +460,10 @@ while(ptr->next_list!=NULL){
 								
 				mean_list_ptr-> prob = probability_calc( mean_list_ptr->token ,list_ptr, list_ptr2);
 				
-				printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
+				//printf(" token (%s)  %lf \n",mean_list_ptr->token, mean_list_ptr->prob);
 				mean_list_ptr = mean_list_ptr->next_token;
 				
 			} 
-					printf(" \n");
 			//printMeanList(mean_list);
 		kld(ptr, ptr2, mean_list);
 		ptr2 = ptr2->next_list;
@@ -489,9 +487,11 @@ struct Lnode * ptr2 = list2;
 struct Tnode * list_ptr = ptr->token_list;
 struct Tnode * list_ptr2 = ptr2->token_list;
 struct Tnode * mean_list_ptr = mean_list;
+ 
  double k1 = 0.0;
- double k2 = 0.0 ;
- double jsd, x, m, log1, log2;
+ double k2 = 0.0 ; 
+
+ double jsd, x, m, log1, log2 = 0.0;
     while(list_ptr!=NULL){
         x = list_ptr->prob;
         mean_list_ptr = mean_list; // resets mean_list ptr to head of mean list after iteration
@@ -502,9 +502,9 @@ struct Tnode * mean_list_ptr = mean_list;
 	     }
              mean_list_ptr = mean_list_ptr->next_token;
 	}
-	    log1 = log((x/m));
+			log1 = log10((x/m));
 	    k1 = k1 + (x * log1);
-	    list_ptr = list_ptr->next_token;
+			list_ptr = list_ptr->next_token;
    }
 	 
 
@@ -520,10 +520,11 @@ struct Tnode * mean_list_ptr = mean_list;
 		}
                 mean_list_ptr = mean_list_ptr->next_token;
                }
-	    log2 = log((x/m));
+	    log2 = log10((x/m));
 	    k2 = k2 + (x * log2);
 	    list_ptr2 = list_ptr2->next_token;
-	  }
+	  } 
+
 	  jsd = ((k1+k2))/2 ;
 	    
 	  // printf("JSD for file %s, file %s is %lf\n", list1->file_handle, list2->file_handle, jsd);
